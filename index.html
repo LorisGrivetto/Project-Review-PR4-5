@@ -32,7 +32,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
-  scroll-behavior: auto; /* Disabilita smooth scroll per navigazione a click */
+  scroll-behavior: auto;
   overflow-x: hidden;
 }
 
@@ -45,7 +45,7 @@ body {
 }
 
 /* ════════════════════════════════════════════════
-   SLIDE CONTAINER - APPROCCIO CAROUSEL
+   SLIDE CONTAINER - CAROUSEL PULITO
 ════════════════════════════════════════════════ */
 .slider-wrapper {
   position: relative;
@@ -56,7 +56,7 @@ body {
 
 .slide-track {
   display: flex;
-  width: calc(100% * 9); /* 9 slides */
+  width: calc(100% * 9);
   height: 100%;
   transition: transform 0.6s var(--ease-out);
   will-change: transform;
@@ -70,121 +70,149 @@ section.slide {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4vh 6vw; /* Padding sicuro per evitare tagli */
+  padding: 5vh 10vw; /* Padding aumentato per evitare interferenze */
   overflow: hidden;
 }
 
 /* ════════════════════════════════════════════════
-   NAVIGATION ARROWS
+   NAVIGATION - MINIMAL & PULITA
+   (Senza interferenze con il contenuto)
 ════════════════════════════════════════════════ */
+
+/* Freccia Sinistra - Più piccola e discreta */
 .nav-arrow {
   position: fixed;
   top: 50%;
   transform: translateY(-50%);
   z-index: 10000;
-  width: 56px;
-  height: 56px;
+  width: 40px; /* Ridotto da 56px */
+  height: 40px;
   border-radius: 50%;
-  background: var(--bg3);
-  border: 2px solid var(--gray2);
-  color: var(--white);
-  font-size: 1.5rem;
+  background: rgba(22, 22, 34, 0.8); /* Semi-trasparente */
+  border: 1px solid var(--gray3);
+  color: var(--gray);
+  font-size: 1.1rem;
   display: grid;
   place-items: center;
   cursor: pointer;
   transition: all var(--transition);
-  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(10px);
   user-select: none;
+  opacity: 0.6; /* Più discreta */
 }
 
 .nav-arrow:hover {
-  background: var(--red);
+  opacity: 1;
+  background: rgba(230, 57, 70, 0.2);
   border-color: var(--red);
-  transform: translateY(-50%) scale(1.1);
-  box-shadow: 0 0 30px var(--red-glow);
+  color: var(--red);
+  transform: translateY(-50%) scale(1.15);
 }
 
 .nav-arrow:disabled {
-  opacity: 0.3;
+  opacity: 0.2;
   cursor: not-allowed;
   transform: translateY(-50%);
 }
 
 .nav-arrow:disabled:hover {
-  background: var(--bg3);
-  border-color: var(--gray2);
+  background: rgba(22, 22, 34, 0.8);
+  border-color: var(--gray3);
+  color: var(--gray);
   transform: translateY(-50%);
-  box-shadow: var(--shadow-md);
 }
 
-.nav-prev { left: 1.5rem; }
-.nav-next { right: 1.5rem; }
+.nav-prev { left: 2rem; } /* Spostata più a sinistra */
+.nav-next { right: 2rem; }
 
 /* ════════════════════════════════════════════════
-   PROGRESS BAR & DOTS
+   DOTS - COMPATTI E DISCRETI
 ════════════════════════════════════════════════ */
-#progress {
-  position: fixed; top: 0; left: 0; z-index: 10000;
-  height: 4px; width: 0%;
-  background: linear-gradient(90deg, var(--red), var(--teal), var(--gold));
-  transition: width 0.4s var(--ease);
-}
-
 #nav-dots {
-  position: fixed; right: 1.5rem; top: 50%; transform: translateY(-50%);
+  position: fixed;
+  right: 1.2rem; /* Spostato più a destra */
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 10000;
-  display: flex; flex-direction: column; gap: 0.9rem;
-  padding: 1rem 0;
-  background: var(--bg3);
-  border-radius: 12px;
-  border: 1px solid var(--gray2);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem; /* Gap ridotto */
+  padding: 0.8rem 0.5rem; /* Padding ridotto */
+  background: transparent; /* Sfondo rimosso per non interferire */
+  border: none;
 }
 
 .dot {
-  width: 10px; height: 10px;
-  border: 2px solid var(--gray);
+  width: 8px; /* Ridotto da 10px */
+  height: 8px;
+  border: 1.5px solid var(--gray2);
   border-radius: 50%;
   cursor: pointer;
   transition: all var(--transition);
   background: transparent;
-  margin: 0 6px;
+  margin: 0;
+  opacity: 0.5; /* Più discreto */
 }
 
-.dot:hover { border-color: var(--white); transform: scale(1.2); }
+.dot:hover {
+  opacity: 0.8;
+  border-color: var(--gray);
+  transform: scale(1.3);
+}
+
 .dot.active {
   background: var(--red);
   border-color: var(--red);
-  box-shadow: 0 0 0 4px rgba(230,57,70,0.2);
+  opacity: 1;
+  box-shadow: 0 0 8px rgba(230,57,70,0.4);
+  transform: scale(1.2);
 }
 
-/* Tooltip per i dot */
+/* Tooltip più compatto */
 .dot[title]:hover::before {
   content: attr(title);
   position: absolute;
-  right: 32px; top: 50%; transform: translateY(-50%);
-  background: var(--bg4); color: var(--white);
-  padding: 0.4rem 0.8rem; border-radius: 4px;
-  font-size: 0.75rem; font-family: var(--mono);
-  white-space: nowrap; border: 1px solid var(--gray2);
-  z-index: 10001; animation: fadeSlideIn 0.2s var(--ease);
-}
-
-@keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(-50%) translateX(10px); }
-  to { opacity: 1; transform: translateY(-50%) translateX(0); }
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg4);
+  color: var(--white);
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-family: var(--mono);
+  white-space: nowrap;
+  border: 1px solid var(--gray2);
+  z-index: 10001;
+  pointer-events: none;
 }
 
 /* ════════════════════════════════════════════════
+   PROGRESS BAR
+════════════════════════════════════════════════ */
+#progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10001;
+  height: 3px; /* Più sottile */
+  width: 0%;
+  background: linear-gradient(90deg, var(--red), var(--teal));
+  transition: width 0.4s var(--ease);
+  box-shadow: 0 0 10px rgba(230,57,70,0.3);
+}
+
+/* ═══════════════════════════════════════════════
    BACKGROUNDS & EFFECTS
 ════════════════════════════════════════════════ */
 .grid-bg {
   position: absolute; inset: 0;
   background-image:
-    linear-gradient(rgba(230,57,70,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(230,57,70,0.04) 1px, transparent 1px);
+    linear-gradient(rgba(230,57,70,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(230,57,70,0.03) 1px, transparent 1px);
   background-size: 50px 50px;
   animation: gridDrift 30s linear infinite;
-  opacity: 0.6; pointer-events: none;
+  opacity: 0.5; pointer-events: none;
 }
 
 @keyframes gridDrift {
@@ -194,7 +222,7 @@ section.slide {
 
 .orb {
   position: absolute; border-radius: 50%;
-  filter: var(--blur-lg); opacity: 0.15;
+  filter: var(--blur-lg); opacity: 0.12;
   pointer-events: none; animation: float 20s ease-in-out infinite;
 }
 
@@ -223,25 +251,25 @@ section.slide {
 .orb-teal { width: 400px; height: 400px; background: var(--teal); right: 150px; bottom: 100px; opacity: 0.12; }
 
 .hero-content {
-  max-width: 750px;
+  max-width: 700px;
   z-index: 2;
-  padding-top: 2vh; /* Spazio per la progress bar */
+  padding-top: 3vh;
 }
 
 .hero-badge {
-  display: inline-flex; align-items: center; gap: 0.6rem;
+  display: inline-flex; align-items: center; gap: 0.5rem;
   border: 1px solid var(--red);
-  padding: 0.4rem 1.2rem;
-  font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em;
+  padding: 0.35rem 1rem;
+  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em;
   color: var(--red); text-transform: uppercase;
-  margin-bottom: 2rem;
-  background: rgba(230,57,70,0.08);
+  margin-bottom: 1.8rem;
+  background: rgba(230,57,70,0.06);
   border-radius: 100px;
   animation: fadeUp 0.8s 0.2s both;
 }
 
 .hero-badge::before {
-  content: ''; width: 6px; height: 6px;
+  content: ''; width: 5px; height: 5px;
   background: var(--red); border-radius: 50%;
   animation: pulse 1.5s infinite;
 }
@@ -250,7 +278,7 @@ section.slide {
 
 .hero-title {
   font-family: var(--display);
-  font-size: clamp(3.5rem, 10vw, 9rem);
+  font-size: clamp(3rem, 8vw, 7rem);
   line-height: 0.9;
   letter-spacing: -0.02em;
   animation: fadeUp 0.9s 0.4s both;
@@ -258,64 +286,42 @@ section.slide {
 
 .hero-title span { color: var(--red); }
 .hero-title .outline {
-  -webkit-text-stroke: 2px rgba(255,255,255,0.15);
+  -webkit-text-stroke: 2px rgba(255,255,255,0.12);
   color: transparent;
 }
 
 .hero-sub {
-  font-size: 1.15rem; font-weight: 300; color: var(--gray);
-  margin-top: 1.5rem; max-width: 550px; line-height: 1.75;
+  font-size: 1.1rem; font-weight: 300; color: var(--gray);
+  margin-top: 1.4rem; max-width: 500px; line-height: 1.7;
   animation: fadeUp 0.9s 0.6s both;
 }
 
 .hero-tags {
-  display: flex; flex-wrap: wrap; gap: 0.6rem;
-  margin-top: 2.2rem;
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
+  margin-top: 2rem;
   animation: fadeUp 0.9s 0.8s both;
 }
 
 .hero-tag {
-  padding: 0.4rem 1rem;
+  padding: 0.35rem 0.9rem;
   background: var(--bg3); border: 1px solid var(--gray2);
-  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
   text-transform: uppercase; color: var(--white);
-  clip-path: polygon(8px 0%, 100% 0%, calc(100%-8px) 100%, 0% 100%);
+  clip-path: polygon(6px 0%, 100% 0%, calc(100%-6px) 100%, 0% 100%);
   transition: transform var(--transition);
 }
 
 .hero-tag:hover { transform: translateY(-2px); border-color: var(--teal); }
-
-.hero-scroll-hint {
-  position: absolute; bottom: 3rem; left: 6vw;
-  display: flex; align-items: center; gap: 0.8rem;
-  font-family: var(--mono); font-size: 0.7rem; color: var(--gray);
-  letter-spacing: 0.12em; text-transform: uppercase;
-  animation: fadeUp 0.9s 1s both;
-}
-
-.scroll-arrow {
-  width: 30px; height: 30px;
-  border: 2px solid var(--gray);
-  border-radius: 50%;
-  display: grid; place-items: center;
-  animation: bounce 2s infinite;
-}
-
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(6px); }
-}
 
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Car silhouette */
 .hero-car {
-  position: absolute; right: 4vw; bottom: 8vh;
-  width: min(45vw, 550px);
-  opacity: 0.06; pointer-events: none; user-select: none;
+  position: absolute; right: 3vw; bottom: 6vh;
+  width: min(40vw, 500px);
+  opacity: 0.05; pointer-events: none; user-select: none;
 }
 
 /* ════════════════════════════════════════════════
@@ -323,76 +329,76 @@ section.slide {
 ════════════════════════════════════════════════ */
 #s2 {
   background: 
-    radial-gradient(ellipse at 30% 70%, rgba(6,214,160,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 30% 70%, rgba(6,214,160,0.04) 0%, transparent 50%),
     var(--bg2);
 }
 
 .two-col {
   display: grid; grid-template-columns: 1fr 1fr;
-  width: 100%; max-width: 1100px; gap: 3rem;
+  width: 100%; max-width: 1000px; gap: 2.5rem;
 }
 
 .col-problem, .col-solution {
-  padding: 2rem;
+  padding: 1.5rem;
   display: flex; flex-direction: column; justify-content: center;
 }
 
 .col-problem { border-right: 1px solid var(--gray2); }
 
 .col-label {
-  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.22em;
-  text-transform: uppercase; margin-bottom: 1.5rem;
-  display: flex; align-items: center; gap: 0.7rem;
-  padding-bottom: 1rem; border-bottom: 1px solid var(--gray2);
+  font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.2em;
+  text-transform: uppercase; margin-bottom: 1.3rem;
+  display: flex; align-items: center; gap: 0.6rem;
+  padding-bottom: 0.8rem; border-bottom: 1px solid var(--gray2);
 }
 
-.col-label-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.col-label-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
 .col-heading {
   font-family: var(--display);
-  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-size: clamp(2.2rem, 4.5vw, 3.5rem);
   letter-spacing: 0.02em; line-height: 1;
-  margin-bottom: 2rem;
+  margin-bottom: 1.8rem;
 }
 
 .item-row {
-  display: flex; align-items: flex-start; gap: 1rem;
-  padding: 0.9rem; margin: 0.3rem 0;
-  border-radius: 6px;
-  background: rgba(255,255,255,0.02);
+  display: flex; align-items: flex-start; gap: 0.8rem;
+  padding: 0.7rem 0.8rem; margin: 0.25rem 0;
+  border-radius: 5px;
+  background: rgba(255,255,255,0.015);
   transition: background var(--transition);
   opacity: 0; transform: translateX(-20px);
 }
 
 .item-row.visible { opacity: 1; transform: translateX(0); }
-.item-row:hover { background: rgba(255,255,255,0.05); }
+.item-row:hover { background: rgba(255,255,255,0.04); }
 
 .col-solution .item-row { transform: translateX(20px); }
 .col-solution .item-row.visible { transform: translateX(0); }
-.col-solution .item-row:hover { background: rgba(6,214,160,0.08); }
+.col-solution .item-row:hover { background: rgba(6,214,160,0.06); }
 
 .item-icon {
-  width: 28px; height: 28px; flex-shrink: 0;
+  width: 26px; height: 26px; flex-shrink: 0;
   border-radius: 5px; display: grid; place-items: center;
-  font-size: 1rem; margin-top: 0.1rem;
+  font-size: 0.9rem; margin-top: 0.1rem;
   background: var(--bg3); border: 1px solid var(--gray2);
 }
 
-.item-text { font-size: 0.98rem; line-height: 1.5; }
-.item-text strong { display: block; font-weight: 600; margin-bottom: 0.15rem; }
-.item-sub { font-size: 0.85rem; color: var(--gray); }
+.item-text { font-size: 0.95rem; line-height: 1.5; }
+.item-text strong { display: block; font-weight: 600; margin-bottom: 0.1rem; font-size: 0.92rem; }
+.item-sub { font-size: 0.82rem; color: var(--gray); }
 
 .vs-divider {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
   z-index: 10;
-  width: 56px; height: 56px;
+  width: 50px; height: 50px;
   background: var(--bg);
-  border: 2px solid var(--red);
+  border: 1.5px solid var(--red);
   border-radius: 50%;
   display: grid; place-items: center;
-  font-family: var(--display); font-size: 1.1rem;
+  font-family: var(--display); font-size: 1rem;
   color: var(--red);
-  box-shadow: 0 0 25px rgba(230,57,70,0.35);
+  box-shadow: 0 0 20px rgba(230,57,70,0.3);
 }
 
 /* ════════════════════════════════════════════════
@@ -400,39 +406,39 @@ section.slide {
 ════════════════════════════════════════════════ */
 #s3 {
   background: 
-    radial-gradient(ellipse at 50% 0%, rgba(78,205,196,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 0%, rgba(78,205,196,0.05) 0%, transparent 50%),
     var(--bg);
   flex-direction: column;
-  padding: 6vh 6vw;
+  padding: 6vh 8vw;
 }
 
 .section-title {
   font-family: var(--display);
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-size: clamp(2.2rem, 5vw, 4rem);
   letter-spacing: 0.04em; text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
 }
 
 .section-title .num {
-  font-family: var(--mono); font-size: 0.8rem;
-  color: var(--red); letter-spacing: 0.22em;
-  display: block; text-align: center; margin-bottom: 0.5rem;
+  font-family: var(--mono); font-size: 0.75rem;
+  color: var(--red); letter-spacing: 0.2em;
+  display: block; text-align: center; margin-bottom: 0.4rem;
 }
 
 .feat-grid {
   display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 1px; width: 100%; max-width: 1100px;
-  background: var(--gray2); border-radius: 12px; overflow: hidden;
+  gap: 1px; width: 100%; max-width: 1000px;
+  background: var(--gray2); border-radius: 10px; overflow: hidden;
 }
 
 .feat-card {
-  background: var(--bg2); padding: 1.8rem;
+  background: var(--bg2); padding: 1.6rem;
   position: relative; transition: background var(--transition);
-  display: flex; flex-direction: column; min-height: 200px;
+  display: flex; flex-direction: column; min-height: 180px;
 }
 
 .feat-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
   background: linear-gradient(90deg, var(--c, var(--teal)), transparent);
   opacity: 0; transition: opacity var(--transition);
 }
@@ -441,23 +447,23 @@ section.slide {
 .feat-card:hover::before { opacity: 1; }
 
 .feat-num {
-  font-family: var(--display); font-size: 3.5rem;
-  color: var(--gray3); position: absolute; top: 0.3rem; right: 1rem;
-  opacity: 0.5; pointer-events: none;
+  font-family: var(--display); font-size: 3rem;
+  color: var(--gray3); position: absolute; top: 0.2rem; right: 0.8rem;
+  opacity: 0.4; pointer-events: none;
 }
 
 .feat-icon-wrap {
-  width: 44px; height: 44px; border-radius: 9px;
-  display: grid; place-items: center; font-size: 1.4rem;
-  margin-bottom: 1rem; background: var(--bg3); border: 1px solid var(--gray2);
+  width: 40px; height: 40px; border-radius: 8px;
+  display: grid; place-items: center; font-size: 1.3rem;
+  margin-bottom: 0.9rem; background: var(--bg3); border: 1px solid var(--gray2);
 }
 
 .feat-name {
-  font-weight: 700; font-size: 1.05rem;
-  margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.07em;
+  font-weight: 700; font-size: 1rem;
+  margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.06em;
 }
 
-.feat-desc { font-size: 0.9rem; color: var(--gray); line-height: 1.6; }
+.feat-desc { font-size: 0.88rem; color: var(--gray); line-height: 1.55; }
 
 /* ════════════════════════════════════════════════
    SLIDE 4 — STACK
@@ -466,34 +472,34 @@ section.slide {
   background: 
     radial-gradient(ellipse at 80% 30%, rgba(255,217,61,0.04) 0%, transparent 50%),
     var(--bg2);
-  flex-direction: column; padding: 6vh 6vw;
+  flex-direction: column; padding: 6vh 8vw;
 }
 
 .stack-grid {
   display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem; width: 100%; max-width: 1100px;
+  gap: 1.2rem; width: 100%; max-width: 1000px;
 }
 
 .stack-card {
   background: linear-gradient(145deg, var(--bg3), var(--bg4));
-  border: 1px solid var(--gray2); padding: 2rem;
-  border-radius: 12px; transition: border-color var(--transition);
+  border: 1px solid var(--gray2); padding: 1.8rem;
+  border-radius: 10px; transition: border-color var(--transition);
 }
 
 .stack-card:hover { border-color: var(--accent, var(--teal)); }
 
 .stack-header {
-  display: flex; align-items: center; gap: 0.9rem;
-  margin-bottom: 1.5rem; padding-bottom: 1.2rem;
+  display: flex; align-items: center; gap: 0.8rem;
+  margin-bottom: 1.3rem; padding-bottom: 1rem;
   border-bottom: 1px solid var(--gray2);
 }
 
-.stack-icon { font-size: 1.8rem; }
-.stack-name { font-family: var(--display); font-size: 1.8rem; }
+.stack-icon { font-size: 1.6rem; }
+.stack-name { font-family: var(--display); font-size: 1.6rem; }
 
-.stack-items { list-style: none; display: flex; flex-direction: column; gap: 0.7rem; }
+.stack-items { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
 .stack-items li {
-  font-size: 0.92rem; display: flex; align-items: center; gap: 0.6rem;
+  font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;
 }
 .stack-items li::before {
   content: ''; width: 4px; height: 4px; border-radius: 50%;
@@ -505,89 +511,89 @@ section.slide {
 ════════════════════════════════════════════════ */
 #s5 {
   background: var(--bg);
-  padding: 6vh 6vw;
+  padding: 6vh 8vw;
 }
 
 .arch-container {
-  display: flex; align-items: center; gap: 4rem;
-  width: 100%; max-width: 1100px; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 3rem;
+  width: 100%; max-width: 1000px; flex-wrap: wrap;
 }
 
 .arch-left {
-  flex: 0 0 280px; display: flex; flex-direction: column; gap: 0.3rem;
+  flex: 0 0 260px; display: flex; flex-direction: column; gap: 0.2rem;
 }
 
 .tier-box {
-  padding: 1.2rem 1.4rem; border: 1px solid var(--gray2);
-  border-radius: 8px; background: var(--bg3);
+  padding: 1rem 1.2rem; border: 1px solid var(--gray2);
+  border-radius: 6px; background: var(--bg3);
   transition: border-color var(--transition);
 }
 
 .tier-box:hover { border-color: inherit; }
-.tier-name { font-weight: 700; font-size: 1rem; }
-.tier-sub { font-size: 0.78rem; color: var(--gray); font-family: var(--mono); margin-top: 0.2rem; }
+.tier-name { font-weight: 700; font-size: 0.95rem; }
+.tier-sub { font-size: 0.75rem; color: var(--gray); font-family: var(--mono); margin-top: 0.15rem; }
 
 .tier-arrow {
-  height: 36px; width: 1px; background: var(--gray2);
+  height: 30px; width: 1px; background: var(--gray2);
   margin: 0 auto; position: relative;
 }
 .tier-arrow::after {
-  content: '↓'; color: var(--gray); font-size: 0.9rem;
-  position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
+  content: '↓'; color: var(--gray); font-size: 0.8rem;
+  position: absolute; bottom: -3px; left: 50%; transform: translateX(-50%);
 }
 
-.arch-right { flex: 1; min-width: 300px; max-width: 600px; }
+.arch-right { flex: 1; min-width: 280px; max-width: 550px; }
 
 .api-title {
-  font-family: var(--mono); font-size: 0.72rem; color: var(--gray);
-  letter-spacing: 0.2em; text-transform: uppercase;
-  margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.8rem;
+  font-family: var(--mono); font-size: 0.7rem; color: var(--gray);
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin-bottom: 1rem; display: flex; align-items: center; gap: 0.7rem;
 }
 .api-title::after { content: ''; flex: 1; height: 1px; background: var(--gray2); }
 
 .api-row {
-  display: grid; grid-template-columns: 70px 1fr auto;
-  align-items: center; gap: 1rem; padding: 0.75rem;
-  border-radius: 5px; margin-bottom: 0.3rem;
+  display: grid; grid-template-columns: 65px 1fr auto;
+  align-items: center; gap: 0.8rem; padding: 0.65rem;
+  border-radius: 4px; margin-bottom: 0.25rem;
   transition: background var(--transition-fast);
 }
 .api-row:hover { background: var(--bg3); }
 
 .method-badge {
-  font-family: var(--mono); font-size: 0.7rem; font-weight: 700;
-  text-align: center; padding: 0.3rem 0.5rem; border-radius: 4px;
+  font-family: var(--mono); font-size: 0.68rem; font-weight: 700;
+  text-align: center; padding: 0.25rem 0.4rem; border-radius: 3px;
 }
-.m-post { background: rgba(230,57,70,0.15); color: var(--red); }
-.m-get  { background: rgba(78,205,196,0.12); color: var(--teal); }
-.m-all  { background: rgba(255,217,61,0.12); color: var(--gold); }
+.m-post { background: rgba(230,57,70,0.12); color: var(--red); }
+.m-get  { background: rgba(78,205,196,0.1); color: var(--teal); }
+.m-all  { background: rgba(255,217,61,0.1); color: var(--gold); }
 
-.api-path { font-family: var(--mono); font-size: 0.85rem; }
-.api-desc { font-size: 0.8rem; color: var(--gray); text-align: right; }
+.api-path { font-family: var(--mono); font-size: 0.82rem; }
+.api-desc { font-size: 0.78rem; color: var(--gray); text-align: right; }
 
 /* ════════════════════════════════════════════════
    SLIDE 6 — SCHEMA DATI
 ════════════════════════════════════════════════ */
 #s6 {
   background: 
-    radial-gradient(ellipse at 20% 80%, rgba(230,57,70,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 80%, rgba(230,57,70,0.04) 0%, transparent 50%),
     var(--bg2);
-  flex-direction: column; padding: 6vh 6vw;
+  flex-direction: column; padding: 6vh 8vw;
 }
 
 .schema-grid {
   display: grid; grid-template-columns: 1fr 1fr;
-  gap: 2rem; width: 100%; max-width: 900px;
+  gap: 1.8rem; width: 100%; max-width: 850px;
 }
 
 .table-card {
-  border: 1px solid var(--gray2); border-radius: 12px;
+  border: 1px solid var(--gray2); border-radius: 10px;
   overflow: hidden; background: var(--bg3);
 }
 
 .table-head {
-  display: flex; align-items: center; gap: 0.8rem;
-  padding: 1rem 1.4rem; font-family: var(--display);
-  font-size: 1.5rem; background: var(--bg4);
+  display: flex; align-items: center; gap: 0.7rem;
+  padding: 0.9rem 1.2rem; font-family: var(--display);
+  font-size: 1.4rem; background: var(--bg4);
   border-bottom: 1px solid var(--gray2);
 }
 
@@ -595,20 +601,20 @@ section.slide {
 
 .table-row {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 0.65rem 1.4rem; border-top: 1px solid var(--gray2);
-  font-size: 0.88rem;
+  padding: 0.6rem 1.2rem; border-top: 1px solid var(--gray2);
+  font-size: 0.85rem;
 }
-.table-row:hover { background: rgba(255,255,255,0.03); }
+.table-row:hover { background: rgba(255,255,255,0.025); }
 
-.field-name { font-family: var(--mono); font-weight: 700; font-size: 0.83rem; }
+.field-name { font-family: var(--mono); font-weight: 700; font-size: 0.8rem; }
 .field-pk { color: var(--gold); }
-.field-type { color: var(--gray); font-size: 0.78rem; font-family: var(--mono); }
+.field-type { color: var(--gray); font-size: 0.75rem; font-family: var(--mono); }
 
 .schema-note {
-  font-size: 0.85rem; color: var(--gray);
+  font-size: 0.82rem; color: var(--gray);
   text-align: center; font-family: var(--mono);
-  padding: 1rem 2rem; background: var(--bg3);
-  border-radius: 8px; border: 1px dashed var(--gray2);
+  padding: 0.9rem 1.8rem; background: var(--bg3);
+  border-radius: 6px; border: 1px dashed var(--gray2);
 }
 
 /* ════════════════════════════════════════════════
@@ -616,37 +622,37 @@ section.slide {
 ════════════════════════════════════════════════ */
 #s7 {
   background: var(--bg);
-  flex-direction: column; padding: 6vh 6vw;
+  flex-direction: column; padding: 6vh 8vw;
 }
 
 .sec-grid {
   display: grid; grid-template-columns: 1fr 1fr;
   gap: 1px; background: var(--gray2);
-  border-radius: 12px; overflow: hidden;
-  width: 100%; max-width: 1000px;
+  border-radius: 10px; overflow: hidden;
+  width: 100%; max-width: 950px;
 }
 
 .sec-card {
-  background: var(--bg2); padding: 2.2rem;
+  background: var(--bg2); padding: 2rem;
   position: relative; transition: background var(--transition);
 }
 .sec-card:hover { background: var(--bg3); }
 
 .sec-card-num {
-  font-family: var(--display); font-size: 6rem;
-  color: var(--bg3); position: absolute; right: 1rem; top: 0.3rem;
-  opacity: 0.4; pointer-events: none;
+  font-family: var(--display); font-size: 5rem;
+  color: var(--bg3); position: absolute; right: 0.8rem; top: 0.2rem;
+  opacity: 0.35; pointer-events: none;
 }
 
-.sec-icon { font-size: 2rem; margin-bottom: 1rem; }
+.sec-icon { font-size: 1.8rem; margin-bottom: 0.9rem; }
 .sec-title {
-  font-weight: 700; font-size: 1.1rem;
-  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.8rem;
+  font-weight: 700; font-size: 1.05rem;
+  text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.7rem;
 }
-.sec-text { font-size: 0.92rem; color: var(--gray); line-height: 1.7; }
+.sec-text { font-size: 0.9rem; color: var(--gray); line-height: 1.65; }
 .sec-text code {
-  font-family: var(--mono); font-size: 0.82rem;
-  background: var(--bg4); padding: 0.15rem 0.4rem; border-radius: 3px;
+  font-family: var(--mono); font-size: 0.8rem;
+  background: var(--bg4); padding: 0.12rem 0.35rem; border-radius: 3px;
 }
 
 /* ════════════════════════════════════════════════
@@ -654,35 +660,35 @@ section.slide {
 ════════════════════════════════════════════════ */
 #s8 {
   background: 
-    radial-gradient(ellipse at 50% 100%, rgba(78,205,196,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(78,205,196,0.04) 0%, transparent 50%),
     var(--bg2);
-  flex-direction: column; padding: 6vh 6vw;
+  flex-direction: column; padding: 6vh 8vw;
 }
 
 .demo-grid {
   display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 1rem; width: 100%; max-width: 1000px;
+  gap: 0.9rem; width: 100%; max-width: 950px;
 }
 
 .demo-card {
-  border: 1px solid var(--gray2); padding: 1.8rem;
-  border-radius: 10px; background: var(--bg3);
+  border: 1px solid var(--gray2); padding: 1.6rem;
+  border-radius: 8px; background: var(--bg3);
   transition: border-color var(--transition);
 }
 .demo-card:hover { border-color: var(--border-color, var(--teal)); }
 
 .demo-num {
-  font-family: var(--display); font-size: 2.8rem;
-  margin-bottom: 0.8rem; opacity: 0.9;
+  font-family: var(--display); font-size: 2.5rem;
+  margin-bottom: 0.7rem; opacity: 0.85;
 }
 .demo-title {
-  font-weight: 700; font-size: 1rem;
-  text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 0.6rem;
+  font-weight: 700; font-size: 0.95rem;
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem;
 }
-.demo-text { font-size: 0.85rem; color: var(--gray); line-height: 1.6; }
+.demo-text { font-size: 0.82rem; color: var(--gray); line-height: 1.55; }
 .demo-text code {
-  font-family: var(--mono); font-size: 0.78rem;
-  background: var(--bg4); padding: 0.1rem 0.35rem; border-radius: 3px;
+  font-family: var(--mono); font-size: 0.75rem;
+  background: var(--bg4); padding: 0.08rem 0.3rem; border-radius: 3px;
 }
 
 /* ════════════════════════════════════════════════
@@ -690,114 +696,114 @@ section.slide {
 ════════════════════════════════════════════════ */
 #s9 {
   background: 
-    radial-gradient(ellipse at 30% 50%, rgba(230,57,70,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 30% 50%, rgba(230,57,70,0.06) 0%, transparent 50%),
     var(--bg);
-  flex-direction: column; padding: 6vh 6vw;
+  flex-direction: column; padding: 6vh 8vw;
 }
 
 .concl-container {
-  display: flex; align-items: center; gap: 4rem;
-  width: 100%; max-width: 1000px; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 3rem;
+  width: 100%; max-width: 950px; flex-wrap: wrap;
 }
 
-.concl-left { flex: 1; min-width: 280px; max-width: 450px; }
+.concl-left { flex: 1; min-width: 260px; max-width: 420px; }
 
 .concl-heading {
   font-family: var(--display);
-  font-size: clamp(2.8rem, 7vw, 5rem);
-  line-height: 0.95; margin-bottom: 2rem;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 0.95; margin-bottom: 1.8rem;
 }
 .concl-heading span { color: var(--red); }
 
-.check-list { list-style: none; display: flex; flex-direction: column; gap: 0.9rem; }
+.check-list { list-style: none; display: flex; flex-direction: column; gap: 0.8rem; }
 .check-list li {
-  display: flex; align-items: center; gap: 0.9rem;
-  font-size: 1rem;
+  display: flex; align-items: center; gap: 0.8rem;
+  font-size: 0.98rem;
 }
 .check-list li::before {
   content: '✓'; display: inline-flex; align-items: center; justify-content: center;
-  width: 24px; height: 24px; flex-shrink: 0;
-  background: rgba(6,214,160,0.15); color: var(--green);
-  border: 1px solid rgba(6,214,160,0.3); border-radius: 50%;
-  font-size: 0.75rem; font-weight: 700;
+  width: 22px; height: 22px; flex-shrink: 0;
+  background: rgba(6,214,160,0.12); color: var(--green);
+  border: 1px solid rgba(6,214,160,0.25); border-radius: 50%;
+  font-size: 0.7rem; font-weight: 700;
 }
 
 .divider-v {
-  width: 1px; height: 260px; background: var(--gray2); flex-shrink: 0;
+  width: 1px; height: 240px; background: var(--gray2); flex-shrink: 0;
 }
 
-.concl-right { flex: 1; min-width: 280px; max-width: 450px; }
+.concl-right { flex: 1; min-width: 260px; max-width: 420px; }
 
 .future-title {
-  font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em;
+  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em;
   color: var(--red); text-transform: uppercase;
-  margin-bottom: 1.4rem; display: flex; align-items: center; gap: 0.8rem;
+  margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.7rem;
 }
-.future-title::before { content: '→'; font-size: 1rem; }
+.future-title::before { content: '→'; font-size: 0.95rem; }
 
 .future-list { list-style: none; display: flex; flex-direction: column; gap: 0; }
 .future-item {
-  display: flex; align-items: center; gap: 1.1rem;
-  padding: 0.9rem 0; border-bottom: 1px solid var(--gray2);
-  font-size: 0.95rem; transition: padding-left var(--transition-fast);
+  display: flex; align-items: center; gap: 1rem;
+  padding: 0.8rem 0; border-bottom: 1px solid var(--gray2);
+  font-size: 0.92rem; transition: padding-left var(--transition-fast);
 }
-.future-item:hover { padding-left: 0.6rem; }
-.future-arrow { color: var(--red); font-family: var(--mono); font-size: 0.9rem; opacity: 0.7; }
+.future-item:hover { padding-left: 0.5rem; }
+.future-arrow { color: var(--red); font-family: var(--mono); font-size: 0.85rem; opacity: 0.65; }
 
-/* Footer bar */
 .footer-bar {
   position: absolute; bottom: 0; left: 0; right: 0;
-  height: 56px; background: var(--red);
+  height: 50px; background: var(--red);
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--display); font-size: 1.1rem;
-  letter-spacing: 0.18em; gap: 2rem;
+  font-family: var(--display); font-size: 1rem;
+  letter-spacing: 0.15em; gap: 1.8rem;
 }
-.footer-dot { width: 4px; height: 4px; background: rgba(255,255,255,0.5); border-radius: 50%; }
+.footer-dot { width: 3px; height: 3px; background: rgba(255,255,255,0.4); border-radius: 50%; }
 
 /* ════════════════════════════════════════════════
    REVEAL ANIMATIONS & UTILS
 ════════════════════════════════════════════════ */
 .reveal {
-  opacity: 0; transform: translateY(25px);
-  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+  opacity: 0; transform: translateY(22px);
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
 }
 .reveal.visible { opacity: 1; transform: translateY(0); }
 
 .c-red{color:var(--red)} .c-teal{color:var(--teal)}
 .c-gold{color:var(--gold)} .c-green{color:var(--green)}
-.bg-red{background:rgba(230,57,70,0.15)}
-.bg-teal{background:rgba(78,205,196,0.12)}
-.bg-gold{background:rgba(255,217,61,0.12)}
-.bg-green{background:rgba(6,214,160,0.12)}
-.head-red{background:rgba(230,57,70,0.12)}
-.head-teal{background:rgba(78,205,196,0.1)}
+.bg-red{background:rgba(230,57,70,0.12)}
+.bg-teal{background:rgba(78,205,196,0.1)}
+.bg-gold{background:rgba(255,217,61,0.1)}
+.bg-green{background:rgba(6,214,160,0.1)}
+.head-red{background:rgba(230,57,70,0.1)}
+.head-teal{background:rgba(78,205,196,0.08)}
 
 /* ════════════════════════════════════════════════
    RESPONSIVE
 ════════════════════════════════════════════════ */
 @media (max-width: 1024px) {
   .feat-grid, .stack-grid, .demo-grid { grid-template-columns: repeat(2, 1fr); }
-  .two-col { grid-template-columns: 1fr; gap: 1.5rem; }
+  .two-col { grid-template-columns: 1fr; gap: 1.2rem; }
   .col-problem { border-right: none; border-bottom: 1px solid var(--gray2); }
-  .vs-divider { position: relative; left: auto; top: auto; transform: none; margin: 1.5rem auto; }
+  .vs-divider { position: relative; left: auto; top: auto; transform: none; margin: 1.2rem auto; }
   .schema-grid { grid-template-columns: 1fr; }
   .sec-grid { grid-template-columns: 1fr; }
-  .arch-container, .concl-container { gap: 2.5rem; }
+  .arch-container, .concl-container { gap: 2rem; }
   .divider-v { width: 100%; height: 1px; }
 }
 
 @media (max-width: 640px) {
-  section.slide { padding: 8vh 4vw; }
-  .nav-arrow { width: 48px; height: 48px; font-size: 1.3rem; }
+  section.slide { padding: 8vh 5vw; }
+  .nav-arrow { width: 36px; height: 36px; font-size: 1rem; }
   .nav-prev { left: 1rem; } .nav-next { right: 1rem; }
-  #nav-dots { right: 1rem; padding: 0.8rem; }
-  .hero-title { font-size: clamp(2.8rem, 14vw, 6rem); }
+  #nav-dots { right: 0.8rem; padding: 0.6rem 0.3rem; gap: 0.5rem; }
+  .dot { width: 7px; height: 7px; }
+  .hero-title { font-size: clamp(2.5rem, 12vw, 5rem); }
   .hero-sub { font-size: 1rem; max-width: 100%; }
   .feat-grid, .stack-grid, .demo-grid { grid-template-columns: 1fr; }
-  .col-heading { font-size: clamp(2rem, 8vw, 3rem); }
-  .api-row { grid-template-columns: 1fr; gap: 0.4rem; text-align: center; }
+  .col-heading { font-size: clamp(1.8rem, 7vw, 2.8rem); }
+  .api-row { grid-template-columns: 1fr; gap: 0.3rem; text-align: center; }
   .api-desc { text-align: center; }
-  .footer-bar { flex-wrap: wrap; height: auto; padding: 0.8rem; font-size: 0.9rem; gap: 1rem; }
+  .footer-bar { flex-wrap: wrap; height: auto; padding: 0.7rem; font-size: 0.85rem; gap: 0.8rem; }
 }
 
 /* Focus visible per accessibilità */
@@ -808,7 +814,7 @@ section.slide {
 
 <div id="progress"></div>
 
-<!-- Navigation Arrows -->
+<!-- Navigation Arrows - MINIMAL -->
 <button class="nav-arrow nav-prev" id="prevBtn" aria-label="Slide precedente" disabled>
   ←
 </button>
@@ -816,7 +822,7 @@ section.slide {
   →
 </button>
 
-<!-- Navigation Dots -->
+<!-- Navigation Dots - COMPATTI -->
 <nav id="nav-dots" aria-label="Navigazione slide">
   <button class="dot active" data-slide="0" title="Intro" aria-label="Vai a Intro"></button>
   <button class="dot" data-slide="1" title="Problema" aria-label="Vai a Problema"></button>
@@ -833,7 +839,7 @@ section.slide {
 <div class="slider-wrapper">
   <div class="slide-track" id="slideTrack">
 
-    <!-- ═══════════════════ SLIDE 1 — HERO ═══════════════════ -->
+    <!-- SLIDE 1 — HERO -->
     <section class="slide" id="s1" aria-labelledby="hero-title">
       <div class="grid-bg" aria-hidden="true"></div>
       <div class="orb orb-red" aria-hidden="true"></div>
@@ -866,14 +872,9 @@ section.slide {
         <path d="M220 110 L230 145 L380 140 L390 85 Z" opacity=".6"/>
         <path d="M390 85 L510 70 L530 120 L380 140 Z" opacity=".5"/>
       </svg>
-
-      <div class="hero-scroll-hint" aria-hidden="true">
-        <div class="scroll-arrow">↓</div>
-        <span>Usa le frecce</span>
-      </div>
     </section>
 
-    <!-- ═══════════════════ SLIDE 2 — PROBLEMA ═══════════════════ -->
+    <!-- SLIDE 2 — PROBLEMA -->
     <section class="slide" id="s2" aria-labelledby="problem-title">
       <div class="grid-bg" style="opacity:0.4" aria-hidden="true"></div>
       <div class="two-col">
@@ -883,10 +884,10 @@ section.slide {
             <span class="c-red">Prima</span>
           </div>
           <h2 class="col-heading" id="problem-title">Senza<br>SportCarDB</h2>
-          <div class="item-row reveal"><div class="item-icon bg-red">❌</div><div class="item-text"><strong>Catalogo disperso</strong><span class="item-sub">Difficile da filtrare, nessuna ricerca avanzata</span></div></div>
-          <div class="item-row reveal" style="transition-delay:.1s"><div class="item-icon bg-red">❌</div><div class="item-text"><strong>Nessun confronto</strong><span class="item-sub">Comparazione modelli solo manuale</span></div></div>
-          <div class="item-row reveal" style="transition-delay:.2s"><div class="item-icon bg-red">❌</div><div class="item-text"><strong>Suggerimenti incoerenti</strong><span class="item-sub">Raccomandazioni soggettive</span></div></div>
-          <div class="item-row reveal" style="transition-delay:.3s"><div class="item-icon bg-red">❌</div><div class="item-text"><strong>Nessuna gestione ruoli</strong><span class="item-sub">Accesso non differenziato</span></div></div>
+          <div class="item-row reveal"><div class="item-icon bg-red"></div><div class="item-text"><strong>Catalogo disperso</strong><span class="item-sub">Difficile da filtrare</span></div></div>
+          <div class="item-row reveal" style="transition-delay:.1s"><div class="item-icon bg-red">❌</div><div class="item-text"><strong>Nessun confronto</strong><span class="item-sub">Solo manuale</span></div></div>
+          <div class="item-row reveal" style="transition-delay:.2s"><div class="item-icon bg-red">❌</div><div class="item-text"><strong>Suggerimenti incoerenti</strong><span class="item-sub">Soggettivi</span></div></div>
+          <div class="item-row reveal" style="transition-delay:.3s"><div class="item-icon bg-red">❌</div><div class="item-text"><strong>Nessuna gestione ruoli</strong><span class="item-sub">Accesso unico</span></div></div>
           <div class="item-row reveal" style="transition-delay:.4s"><div class="item-icon bg-red">❌</div><div class="item-text"><strong>Dati non centralizzati</strong><span class="item-sub">Informazioni sparse</span></div></div>
         </div>
         <div class="vs-divider" aria-label="Versus">VS</div>
@@ -898,14 +899,14 @@ section.slide {
           <h2 class="col-heading">Con<br>SportCarDB</h2>
           <div class="item-row reveal" style="transition-delay:.05s"><div class="item-icon bg-green">✅</div><div class="item-text"><strong>Filtri avanzati</strong><span class="item-sub">Marca, prezzo, HP, categoria</span></div></div>
           <div class="item-row reveal" style="transition-delay:.15s"><div class="item-icon bg-green">✅</div><div class="item-text"><strong>Confronto affiancato</strong><span class="item-sub">Specs side-by-side</span></div></div>
-          <div class="item-row reveal" style="transition-delay:.25s"><div class="item-icon bg-green">✅</div><div class="item-text"><strong>Consigliatore automatico</strong><span class="item-sub">Punteggio di compatibilità</span></div></div>
-          <div class="item-row reveal" style="transition-delay:.35s"><div class="item-icon bg-green">✅</div><div class="item-text"><strong>Ruoli Admin/User</strong><span class="item-sub">JWT con permessi granulari</span></div></div>
-          <div class="item-row reveal" style="transition-delay:.45s"><div class="item-icon bg-green">✅</div><div class="item-text"><strong>Architettura scalabile</strong><span class="item-sub">Three-tier pronto per PostgreSQL</span></div></div>
+          <div class="item-row reveal" style="transition-delay:.25s"><div class="item-icon bg-green">✅</div><div class="item-text"><strong>Consigliatore automatico</strong><span class="item-sub">Punteggio oggettivo</span></div></div>
+          <div class="item-row reveal" style="transition-delay:.35s"><div class="item-icon bg-green">✅</div><div class="item-text"><strong>Ruoli Admin/User</strong><span class="item-sub">JWT con permessi</span></div></div>
+          <div class="item-row reveal" style="transition-delay:.45s"><div class="item-icon bg-green">✅</div><div class="item-text"><strong>Architettura scalabile</strong><span class="item-sub">Pronto per PostgreSQL</span></div></div>
         </div>
       </div>
     </section>
 
-    <!-- ═══════════════════ SLIDE 3 — FUNZIONALITÀ ═══════════════════ -->
+    <!-- SLIDE 3 — FUNZIONALITÀ -->
     <section class="slide" id="s3" aria-labelledby="features-title">
       <div class="orb" style="width:400px;height:400px;background:var(--teal);left:-100px;top:50%;transform:translateY(-50%);opacity:.06;filter:blur(100px)" aria-hidden="true"></div>
       <h2 class="section-title reveal" id="features-title">
@@ -915,13 +916,13 @@ section.slide {
         <article class="feat-card" style="--c:var(--teal)" role="listitem"><div class="feat-num">01</div><div class="feat-icon-wrap bg-teal">🔍</div><h3 class="feat-name c-teal">Catalogo</h3><p class="feat-desc">Filtri per marca, categoria, prezzo, HP. Ricerca istantanea.</p></article>
         <article class="feat-card" style="--c:var(--gold)" role="listitem"><div class="feat-num">02</div><div class="feat-icon-wrap bg-gold">⚖️</div><h3 class="feat-name c-gold">Confronto</h3><p class="feat-desc">Specs affiancate di due modelli. Visualizzazione chiara.</p></article>
         <article class="feat-card" style="--c:var(--green)" role="listitem"><div class="feat-num">03</div><div class="feat-icon-wrap bg-green">🤖</div><h3 class="feat-name c-green">Consigliatore</h3><p class="feat-desc">Punteggio di compatibilità basato su budget e preferenze.</p></article>
-        <article class="feat-card" style="--c:var(--teal)" role="listitem"><div class="feat-num">04</div><div class="feat-icon-wrap bg-teal">📊</div><h3 class="feat-name c-teal">Statistiche</h3><p class="feat-desc">Ranking per cavalli, velocità, rapporto peso/potenza.</p></article>
+        <article class="feat-card" style="--c:var(--teal)" role="listitem"><div class="feat-num">04</div><div class="feat-icon-wrap bg-teal"></div><h3 class="feat-name c-teal">Statistiche</h3><p class="feat-desc">Ranking per cavalli, velocità, rapporto peso/potenza.</p></article>
         <article class="feat-card" style="--c:var(--gold)" role="listitem"><div class="feat-num">05</div><div class="feat-icon-wrap bg-gold">👥</div><h3 class="feat-name c-gold">Utenti</h3><p class="feat-desc">Gestione ruoli user/admin. CRUD con controllo accessi.</p></article>
         <article class="feat-card" style="--c:var(--red)" role="listitem"><div class="feat-num">06</div><div class="feat-icon-wrap bg-red">🛡️</div><h3 class="feat-name c-red">Sicurezza</h3><p class="feat-desc">JWT, bcrypt, rate limiting, CORS. Stack hardened.</p></article>
       </div>
     </section>
 
-    <!-- ═══════════════════ SLIDE 4 — STACK ═══════════════════ -->
+    <!-- SLIDE 4 — STACK -->
     <section class="slide" id="s4" aria-labelledby="stack-title">
       <h2 class="section-title reveal" id="stack-title">
         <span class="num">03 / Stack</span>Tecnologie Usate
@@ -942,12 +943,12 @@ section.slide {
       </div>
     </section>
 
-    <!-- ═══════════════════ SLIDE 5 — ARCHITETTURA ═══════════════════ -->
+    <!-- SLIDE 5 — ARCHITETTURA -->
     <section class="slide" id="s5" aria-labelledby="arch-title">
       <div class="grid-bg" style="opacity:0.3" aria-hidden="true"></div>
       <div class="arch-container">
         <div>
-          <h2 class="section-title reveal" id="arch-title" style="text-align:left;margin-bottom:2rem">
+          <h2 class="section-title reveal" id="arch-title" style="text-align:left;margin-bottom:1.8rem">
             <span class="num" style="text-align:left">04 / Architettura</span>Flusso<br>Three-Tier
           </h2>
           <div class="arch-left reveal" style="transition-delay:.2s" role="list">
@@ -971,7 +972,7 @@ section.slide {
       </div>
     </section>
 
-    <!-- ═══════════════════ SLIDE 6 — SCHEMA DATI ═══════════════════ -->
+    <!-- SLIDE 6 — SCHEMA DATI -->
     <section class="slide" id="s6" aria-labelledby="schema-title">
       <div class="orb" style="width:400px;height:400px;background:var(--red);right:-50px;bottom:-50px;opacity:.07;filter:blur(100px)" aria-hidden="true"></div>
       <h2 class="section-title reveal" id="schema-title">
@@ -1001,8 +1002,8 @@ section.slide {
             <div class="table-row"><span class="field-name">created_at</span><span class="field-type">ISO date</span></div>
             <div class="table-row"><span class="field-name">last_login</span><span class="field-type">ISO date?</span></div>
           </div>
-          <div style="padding:1rem 1.4rem;border-top:1px solid var(--gray2)">
-            <div style="font-size:0.8rem;color:var(--gray);font-family:var(--mono);line-height:1.8">
+          <div style="padding:0.9rem 1.2rem;border-top:1px solid var(--gray2)">
+            <div style="font-size:0.78rem;color:var(--gray);font-family:var(--mono);line-height:1.7">
               <span style="color:var(--red)">Admin</span> → CRUD su Cars e Users<br>
               <span style="color:var(--teal)">User</span> → sola lettura catalogo
             </div>
@@ -1012,20 +1013,20 @@ section.slide {
       <div class="schema-note reveal" style="transition-delay:.4s">↳ struttura JSON pronta per migrazione a PostgreSQL / MySQL</div>
     </section>
 
-    <!-- ═══════════════════ SLIDE 7 — SICUREZZA ═══════════════════ -->
+    <!-- SLIDE 7 — SICUREZZA -->
     <section class="slide" id="s7" aria-labelledby="security-title">
       <h2 class="section-title reveal" id="security-title">
         <span class="num">06 / Sicurezza</span>Auth &amp; Protezione
       </h2>
       <div class="sec-grid reveal" style="transition-delay:.2s" role="list">
-        <article class="sec-card" role="listitem"><div class="sec-card-num">01</div><div class="sec-icon">🔑</div><h3 class="sec-title c-teal">JWT Tokens</h3><p class="sec-text">Login restituisce JWT con scadenza 24h. Ogni API richiede <code>Bearer token</code> nell'header Authorization.</p></article>
+        <article class="sec-card" role="listitem"><div class="sec-card-num">01</div><div class="sec-icon">🔑</div><h3 class="sec-title c-teal">JWT Tokens</h3><p class="sec-text">Login restituisce JWT con scadenza 24h. Ogni API richiede <code>Bearer token</code>.</p></article>
         <article class="sec-card" role="listitem"><div class="sec-card-num">02</div><div class="sec-icon">🔒</div><h3 class="sec-title c-red">Bcrypt Hashing</h3><p class="sec-text">Password mai in chiaro. Hashing bcrypt <code>12 round</code> prima della persistenza.</p></article>
         <article class="sec-card" role="listitem"><div class="sec-card-num">03</div><div class="sec-icon">🧱</div><h3 class="sec-title c-gold">Ruoli & Middleware</h3><p class="sec-text">Decoratori <code>@require_login</code> e <code>@require_admin</code> proteggono gli endpoint.</p></article>
-        <article class="sec-card" role="listitem"><div class="sec-card-num">04</div><div class="sec-icon">🚫</div><h3 class="sec-title c-green">Rate Limiting</h3><p class="sec-text">Max <code>5 tentativi / 5 min</code> per IP sul login. CORS configurato per origine sicura.</p></article>
+        <article class="sec-card" role="listitem"><div class="sec-card-num">04</div><div class="sec-icon">🚫</div><h3 class="sec-title c-green">Rate Limiting</h3><p class="sec-text">Max <code>5 tentativi / 5 min</code> per IP sul login. CORS configurato.</p></article>
       </div>
     </section>
 
-    <!-- ═══════════════════ SLIDE 8 — DEMO ═══════════════════ -->
+    <!-- SLIDE 8 — DEMO -->
     <section class="slide" id="s8" aria-labelledby="demo-title">
       <div class="grid-bg" style="opacity:0.3" aria-hidden="true"></div>
       <h2 class="section-title reveal" id="demo-title">
@@ -1041,7 +1042,7 @@ section.slide {
       </div>
     </section>
 
-    <!-- ═══════════════════ SLIDE 9 — CONCLUSIONI ═══════════════════ -->
+    <!-- SLIDE 9 — CONCLUSIONI -->
     <section class="slide" id="s9" aria-labelledby="conclusion-title">
       <div class="orb" style="width:600px;height:600px;background:var(--red);left:-200px;top:50%;transform:translateY(-50%);opacity:.08;filter:blur(120px)" aria-hidden="true"></div>
       <div class="concl-container">
@@ -1079,7 +1080,7 @@ section.slide {
 
 <script>
 // ════════════════════════════════════════════════
-// SLIDER LOGIC - NAVIGAZIONE A CLICK
+// SLIDER LOGIC - NAVIGAZIONE PULITA
 // ════════════════════════════════════════════════
 const slideTrack = document.getElementById('slideTrack');
 const slides = document.querySelectorAll('.slide');
@@ -1092,22 +1093,11 @@ let currentSlide = 0;
 const totalSlides = slides.length;
 
 function updateSlider() {
-  // Sposta la track
   slideTrack.style.transform = `translateX(-${currentSlide * 100}vw)`;
-  
-  // Aggiorna dots
-  dots.forEach((dot, i) => {
-    dot.classList.toggle('active', i === currentSlide);
-  });
-  
-  // Aggiorna progress bar
+  dots.forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
   progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
-  
-  // Aggiorna stato bottoni
   prevBtn.disabled = currentSlide === 0;
   nextBtn.disabled = currentSlide === totalSlides - 1;
-  
-  // Trigger reveal animations per la slide corrente
   triggerReveals(slides[currentSlide]);
 }
 
@@ -1115,8 +1105,7 @@ function triggerReveals(slide) {
   const reveals = slide.querySelectorAll('.reveal, .item-row');
   reveals.forEach((el, i) => {
     el.classList.remove('visible');
-    // Reset per ri-animare se si torna indietro
-    setTimeout(() => el.classList.add('visible'), i * 60);
+    setTimeout(() => el.classList.add('visible'), i * 50);
   });
 }
 
@@ -1129,26 +1118,16 @@ function goToSlide(index) {
 function nextSlide() { goToSlide(currentSlide + 1); }
 function prevSlide() { goToSlide(currentSlide - 1); }
 
-// Event listeners per frecce
 nextBtn.addEventListener('click', nextSlide);
 prevBtn.addEventListener('click', prevSlide);
 
-// Event listeners per dots
 dots.forEach(dot => {
-  dot.addEventListener('click', () => {
-    const index = parseInt(dot.dataset.slide, 10);
-    goToSlide(index);
-  });
+  dot.addEventListener('click', () => goToSlide(parseInt(dot.dataset.slide, 10)));
 });
 
-// Keyboard navigation
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowRight' || e.key === 'PageDown') {
-    e.preventDefault(); nextSlide();
-  }
-  if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
-    e.preventDefault(); prevSlide();
-  }
+  if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); nextSlide(); }
+  if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prevSlide(); }
   if (e.key === 'Home') { e.preventDefault(); goToSlide(0); }
   if (e.key === 'End') { e.preventDefault(); goToSlide(totalSlides - 1); }
 });
@@ -1156,21 +1135,12 @@ document.addEventListener('keydown', (e) => {
 // Inizializza
 updateSlider();
 
-// ════════════════════════════════════════════════
-// FEAT CARD COLORS
-// ════════════════════════════════════════════════
+// Feat card colors
 const featColors = ['var(--teal)','var(--gold)','var(--green)','var(--teal)','var(--gold)','var(--red)'];
-document.querySelectorAll('.feat-card').forEach((card, i) => {
-  card.style.setProperty('--c', featColors[i]);
-});
+document.querySelectorAll('.feat-card').forEach((card, i) => card.style.setProperty('--c', featColors[i]));
 
-// ════════════════════════════════════════════════
-// PRELOAD & INIT
-// ════════════════════════════════════════════════
-window.addEventListener('load', () => {
-  // Trigger initial reveals for first slide
-  triggerReveals(slides[0]);
-});
+// Preload
+window.addEventListener('load', () => triggerReveals(slides[0]));
 </script>
 </body>
 </html>
