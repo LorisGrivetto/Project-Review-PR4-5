@@ -3,416 +3,812 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="SportCarDB - Sistema integrato per la gestione del catalogo veicoli sportivi">
 <title>SportCarDB</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;0,700;1,300&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
+/* ════════════════════════════════════════════════
+   VARIABLES & RESET
+════════════════════════════════════════════════ */
 :root {
+  /* Palette principale */
   --red: #E63946;
   --red2: #FF4D5A;
+  --red-glow: rgba(230, 57, 70, 0.4);
   --bg: #07070C;
   --bg2: #0F0F18;
   --bg3: #161622;
+  --bg4: #1E1E2E;
   --teal: #4ECDC4;
+  --teal-glow: rgba(78, 205, 196, 0.3);
   --gold: #FFD93D;
+  --gold-glow: rgba(255, 217, 61, 0.25);
   --green: #06D6A0;
+  --green-glow: rgba(6, 214, 160, 0.3);
   --white: #F5F5F0;
-  --gray: #6B6B7A;
+  --gray: #8A8A9A;
   --gray2: #252530;
+  --gray3: #3A3A4A;
+  
+  /* Tipografia */
   --mono: 'JetBrains Mono', monospace;
+  --sans: 'Barlow', sans-serif;
+  --display: 'Bebas Neue', sans-serif;
+  
+  /* Effetti */
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 8px 30px rgba(0,0,0,0.4);
+  --shadow-lg: 0 20px 60px rgba(0,0,0,0.5);
+  --shadow-glow: 0 0 40px var(--red-glow);
+  --blur: blur(12px);
+  --blur-lg: blur(80px);
+  
+  /* Transizioni */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.22, 0.68, 0, 1.2);
+  --transition-fast: 150ms var(--ease);
+  --transition: 300ms var(--ease);
+  --transition-slow: 500ms var(--ease);
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
 
-html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+html { 
+  scroll-behavior: smooth; 
+  scroll-snap-type: y mandatory;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
 body {
   background: var(--bg);
   color: var(--white);
-  font-family: 'Barlow', sans-serif;
+  font-family: var(--sans);
   overflow-x: hidden;
   cursor: none;
+  line-height: 1.6;
 }
 
-/* ── Custom cursor ── */
+/* Supporta prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
+}
+
+/* ════════════════════════════════════════════════
+   CUSTOM CURSOR
+════════════════════════════════════════════════ */
+.cursor, .cursor-ring {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  border-radius: 50%;
+  mix-blend-mode: difference;
+  will-change: transform;
+}
+
 .cursor {
-  position: fixed; z-index: 9999;
-  width: 12px; height: 12px;
+  width: 10px; height: 10px;
   background: var(--red);
-  border-radius: 50%;
-  pointer-events: none;
-  transition: transform .15s ease, opacity .2s;
-  mix-blend-mode: difference;
+  transform: translate(-50%, -50%);
+  transition: transform var(--transition-fast), opacity 0.2s;
 }
+
 .cursor-ring {
-  position: fixed; z-index: 9998;
-  width: 36px; height: 36px;
-  border: 1.5px solid var(--red);
-  border-radius: 50%;
-  pointer-events: none;
-  transition: transform .35s cubic-bezier(.22,.68,0,1.2), opacity .3s;
-  mix-blend-mode: difference;
+  width: 40px; height: 40px;
+  border: 2px solid var(--red);
+  transform: translate(-50%, -50%) scale(0.8);
+  transition: transform 0.4s var(--ease-out), border-color var(--transition), opacity 0.3s;
+  opacity: 0.9;
 }
 
-/* ── Progress bar ── */
+/* Hover states per cursor */
+a, button, .dot, .item-row, .feat-card, .stack-card, 
+.sec-card, .demo-card, .future-item, [onclick], [role="button"] {
+  cursor: none !important;
+}
+
+a:hover ~ .cursor-ring,
+button:hover ~ .cursor-ring,
+.dot:hover ~ .cursor-ring,
+.item-row:hover ~ .cursor-ring,
+.feat-card:hover ~ .cursor-ring,
+.stack-card:hover ~ .cursor-ring,
+.sec-card:hover ~ .cursor-ring,
+.demo-card:hover ~ .cursor-ring,
+.future-item:hover ~ .cursor-ring,
+[onclick]:hover ~ .cursor-ring,
+[role="button"]:hover ~ .cursor-ring,
+.cursor-hover .cursor-ring {
+  transform: translate(-50%, -50%) scale(1.4);
+  border-color: var(--teal);
+}
+
+.cursor-hover .cursor {
+  transform: translate(-50%, -50%) scale(1.5);
+  background: var(--teal);
+  opacity: 0.9;
+}
+
+/* ════════════════════════════════════════════════
+   PROGRESS BAR & NAVIGATION
+════════════════════════════════════════════════ */
 #progress {
-  position: fixed; top: 0; left: 0; z-index: 1000;
-  height: 3px; width: 0%;
-  background: linear-gradient(90deg, var(--red), var(--teal));
-  transition: width .4s ease;
+  position: fixed; top: 0; left: 0; z-index: 10000;
+  height: 4px; width: 0%;
+  background: linear-gradient(90deg, var(--red), var(--teal), var(--gold));
+  background-size: 200% 100%;
+  animation: gradientShift 3s ease infinite;
+  box-shadow: 0 0 20px var(--red-glow);
+  transition: width 0.3s var(--ease);
 }
 
-/* ── Slide nav dots ── */
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
 #nav-dots {
   position: fixed; right: 2rem; top: 50%; transform: translateY(-50%);
-  z-index: 1000;
-  display: flex; flex-direction: column; gap: .7rem;
+  z-index: 10000;
+  display: flex; flex-direction: column; gap: 1rem;
+  padding: 1rem 0;
 }
-.dot {
-  width: 8px; height: 8px;
-  border: 1.5px solid var(--gray);
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all .3s;
-}
-.dot.active { background: var(--red); border-color: var(--red); transform: scale(1.4); }
-.dot:hover { border-color: var(--white); }
 
-/* ── Section base ── */
+.dot {
+  width: 10px; height: 10px;
+  border: 2px solid var(--gray);
+  border-radius: 50%;
+  cursor: none;
+  transition: all var(--transition);
+  position: relative;
+  background: transparent;
+}
+
+.dot::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: var(--red);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.dot:hover {
+  border-color: var(--white);
+  transform: scale(1.2);
+}
+
+.dot:hover::after { opacity: 0.3; }
+
+.dot.active {
+  background: var(--red);
+  border-color: var(--red);
+  transform: scale(1.3);
+  box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.2);
+}
+
+.dot.active::after { opacity: 0.5; }
+
+/* Tooltip per i dot */
+.dot[title]:hover::before {
+  content: attr(title);
+  position: absolute;
+  right: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg4);
+  color: var(--white);
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: var(--mono);
+  white-space: nowrap;
+  border: 1px solid var(--gray2);
+  z-index: 10001;
+  animation: fadeSlideIn 0.2s var(--ease);
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-50%) translateX(10px); }
+  to { opacity: 1; transform: translateY(-50%) translateX(0); }
+}
+
+/* ════════════════════════════════════════════════
+   SECTION BASE & BACKGROUNDS
+════════════════════════════════════════════════ */
 section {
   height: 100vh; min-height: 100vh;
   scroll-snap-align: start;
   position: relative;
   display: flex;
   overflow: hidden;
+  padding: 2rem;
 }
 
-/* ── Animated grid bg ── */
+/* Animated grid background */
 .grid-bg {
   position: absolute; inset: 0;
   background-image:
-    linear-gradient(rgba(230,57,70,.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(230,57,70,.06) 1px, transparent 1px);
-  background-size: 60px 60px;
-  animation: gridDrift 20s linear infinite;
-}
-@keyframes gridDrift {
-  from { background-position: 0 0; }
-  to   { background-position: 60px 60px; }
+    linear-gradient(rgba(230,57,70,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(230,57,70,0.04) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: gridDrift 30s linear infinite;
+  opacity: 0.6;
+  pointer-events: none;
 }
 
-/* ── Noise overlay ── */
+@keyframes gridDrift {
+  from { background-position: 0 0; }
+  to { background-position: 100px 100px; }
+}
+
+/* Noise overlay con performance ottimizzata */
 body::after {
   content: '';
   position: fixed; inset: 0; z-index: 9000;
   pointer-events: none;
-  opacity: .025;
+  opacity: 0.03;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  will-change: opacity;
 }
 
-/* ── Glow orb ── */
+/* Glow orbs con blur ottimizzato */
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: .18;
+  filter: var(--blur-lg);
+  opacity: 0.15;
   pointer-events: none;
+  will-change: transform;
+  animation: float 20s ease-in-out infinite;
+}
+
+.orb:nth-child(odd) { animation-delay: -5s; }
+.orb:nth-child(even) { animation-delay: -10s; }
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -20px) scale(1.05); }
+  50% { transform: translate(-20px, 30px) scale(0.95); }
+  75% { transform: translate(20px, 20px) scale(1.02); }
 }
 
 /* ════════════════════════════════════════════════
-   SLIDE 1 — HERO
+   SLIDE 1 — HERO (MIGLIORATO)
 ════════════════════════════════════════════════ */
 #s1 {
   align-items: center;
   justify-content: flex-start;
-  padding: 0 8vw;
-  background: var(--bg);
+  padding: 0 6vw;
+  background: 
+    radial-gradient(ellipse at 80% 20%, rgba(230,57,70,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 80%, rgba(78,205,196,0.06) 0%, transparent 50%),
+    var(--bg);
 }
-.orb-red  { width: 500px; height: 500px; background: var(--red);  right: -100px; top: -100px; }
-.orb-teal { width: 300px; height: 300px; background: var(--teal); right: 200px;  bottom: 50px; opacity: .1; }
+
+.orb-red  { width: 600px; height: 600px; background: var(--red);  right: -150px; top: -150px; animation-delay: -2s; }
+.orb-teal { width: 400px; height: 400px; background: var(--teal); right: 150px;  bottom: 100px; opacity: 0.12; animation-delay: -7s; }
 
 .hero-badge {
-  display: inline-flex; align-items: center; gap: .5rem;
+  display: inline-flex; align-items: center; gap: 0.6rem;
   border: 1px solid var(--red);
-  padding: .35rem 1rem;
-  font-family: var(--mono); font-size: .75rem; letter-spacing: .15em;
+  padding: 0.4rem 1.2rem;
+  font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em;
   color: var(--red); text-transform: uppercase;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
   position: relative;
-  animation: fadeUp .8s .2s both;
+  background: rgba(230, 57, 70, 0.08);
+  backdrop-filter: var(--blur);
+  border-radius: 100px;
+  animation: fadeUp 0.8s 0.2s both;
+  box-shadow: 0 4px 20px rgba(230, 57, 70, 0.15);
 }
+
 .hero-badge::before {
   content: ''; width: 6px; height: 6px;
   background: var(--red); border-radius: 50%;
   animation: pulse 1.5s infinite;
+  box-shadow: 0 0 10px var(--red);
 }
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.6)} }
+
+@keyframes pulse { 
+  0%,100% { opacity:1; transform:scale(1); box-shadow: 0 0 10px var(--red); } 
+  50% { opacity:0.5; transform:scale(0.7); box-shadow: 0 0 20px var(--red); } 
+}
 
 .hero-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(5rem, 16vw, 14rem);
-  line-height: .9;
-  letter-spacing: -.02em;
-  animation: fadeUp .8s .4s both;
+  font-family: var(--display);
+  font-size: clamp(4rem, 14vw, 12rem);
+  line-height: 0.85;
+  letter-spacing: -0.03em;
+  animation: fadeUp 0.9s 0.4s both;
+  position: relative;
+  text-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+.hero-title span { 
+  color: var(--red); 
+  position: relative;
+  display: inline-block;
+}
+
+.hero-title span::after {
+  content: '';
+  position: absolute;
+  bottom: 8px; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--red), var(--teal));
+  border-radius: 2px;
+  opacity: 0.6;
+  filter: blur(2px);
+}
+
+.hero-title .outline {
+  -webkit-text-stroke: 2px rgba(255,255,255,0.15);
+  color: transparent;
   position: relative;
 }
-.hero-title span { color: var(--red); }
-.hero-title .outline {
-  -webkit-text-stroke: 2px rgba(255,255,255,.12);
-  color: transparent;
+
+.hero-title .outline::before {
+  content: attr(data-text);
+  position: absolute;
+  left: 0; top: 0;
+  color: rgba(255,255,255,0.03);
+  -webkit-text-stroke: 0;
+  z-index: -1;
 }
 
 .hero-sub {
-  font-size: 1.1rem; font-weight: 300; color: var(--gray);
-  margin-top: 1.5rem; max-width: 480px; line-height: 1.7;
-  animation: fadeUp .8s .6s both;
+  font-size: 1.15rem; font-weight: 300; color: var(--gray);
+  margin-top: 1.8rem; max-width: 520px; line-height: 1.8;
+  animation: fadeUp 0.9s 0.6s both;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
 .hero-tags {
-  display: flex; flex-wrap: wrap; gap: .6rem;
-  margin-top: 2.5rem;
-  animation: fadeUp .8s .8s both;
+  display: flex; flex-wrap: wrap; gap: 0.7rem;
+  margin-top: 2.8rem;
+  animation: fadeUp 0.9s 0.8s both;
 }
+
 .hero-tag {
-  padding: .4rem 1rem;
-  background: var(--bg3); border: 1px solid var(--gray2);
-  font-size: .8rem; font-weight: 600; letter-spacing: .08em;
+  padding: 0.45rem 1.1rem;
+  background: linear-gradient(135deg, var(--bg3), var(--bg4));
+  border: 1px solid var(--gray2);
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--white);
-  clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-tag::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(255,255,255,0.08), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.5s var(--ease);
+}
+
+.hero-tag:hover {
+  border-color: var(--teal);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(78, 205, 196, 0.2);
+}
+
+.hero-tag:hover::before {
+  transform: translateX(100%);
 }
 
 .hero-scroll {
-  position: absolute; bottom: 2.5rem; left: 8vw;
-  display: flex; align-items: center; gap: .8rem;
-  font-family: var(--mono); font-size: .7rem; color: var(--gray);
-  letter-spacing: .1em; text-transform: uppercase;
-  animation: fadeUp .8s 1s both;
+  position: absolute; bottom: 3rem; left: 6vw;
+  display: flex; align-items: center; gap: 1rem;
+  font-family: var(--mono); font-size: 0.72rem; color: var(--gray);
+  letter-spacing: 0.15em; text-transform: uppercase;
+  animation: fadeUp 0.9s 1s both;
 }
+
 .scroll-line {
-  width: 40px; height: 1px; background: var(--gray);
+  width: 50px; height: 2px; background: var(--gray3);
   position: relative; overflow: hidden;
+  border-radius: 2px;
 }
+
 .scroll-line::after {
   content: ''; position: absolute; top: 0; left: -100%;
-  width: 100%; height: 100%; background: var(--red);
-  animation: scanline 2s ease infinite;
+  width: 50%; height: 100%; 
+  background: linear-gradient(90deg, transparent, var(--red), transparent);
+  animation: scanline 2.5s ease-in-out infinite;
+  border-radius: 2px;
 }
-@keyframes scanline { to { left: 100%; } }
 
-/* big car silhouette */
+@keyframes scanline { 
+  0% { left: -50%; } 
+  50% { left: 100%; } 
+  100% { left: 100%; } 
+}
+
+/* Car silhouette con effetto glow */
 .hero-car {
-  position: absolute; right: 6vw; bottom: 8vh;
-  width: min(55vw, 650px);
-  opacity: .07;
-  filter: blur(1px);
+  position: absolute; right: 4vw; bottom: 10vh;
+  width: min(50vw, 600px);
+  opacity: 0.05;
+  filter: blur(0.5px);
   user-select: none; pointer-events: none;
+  transition: opacity 0.5s;
+}
+
+.hero-car:hover {
+  opacity: 0.12;
+  filter: blur(0) drop-shadow(0 0 30px var(--red-glow));
 }
 
 @keyframes fadeUp {
-  from { opacity:0; transform:translateY(30px); }
-  to   { opacity:1; transform:translateY(0); }
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ════════════════════════════════════════════════
    SLIDE 2 — PROBLEMA / SOLUZIONE
 ════════════════════════════════════════════════ */
-#s2 { background: var(--bg2); align-items: stretch; }
+#s2 { 
+  background: 
+    radial-gradient(ellipse at 30% 70%, rgba(6,214,160,0.05) 0%, transparent 50%),
+    var(--bg2); 
+  align-items: stretch; 
+}
 
 .two-col {
   display: grid; grid-template-columns: 1fr 1fr;
-  width: 100%; position: relative;
+  width: 100%; max-width: 1200px; margin: 0 auto;
+  position: relative; gap: 2rem;
 }
+
 .col-problem, .col-solution {
-  padding: 6rem 5vw 4rem;
+  padding: 4rem 3vw;
   display: flex; flex-direction: column; justify-content: center;
 }
-.col-problem { border-right: 1px solid var(--gray2); }
+
+.col-problem { 
+  border-right: 1px solid var(--gray2); 
+  background: linear-gradient(180deg, transparent, rgba(230,57,70,0.03));
+}
+
+.col-solution {
+  background: linear-gradient(180deg, transparent, rgba(6,214,160,0.03));
+}
 
 .col-label {
-  font-family: var(--mono); font-size: .7rem; letter-spacing: .2em;
-  text-transform: uppercase; margin-bottom: 1.5rem;
-  display: flex; align-items: center; gap: .7rem;
+  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.25em;
+  text-transform: uppercase; margin-bottom: 1.8rem;
+  display: flex; align-items: center; gap: 0.8rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--gray2);
 }
+
 .col-label-dot {
-  width: 8px; height: 8px; border-radius: 50%;
+  width: 10px; height: 10px; border-radius: 50%;
   flex-shrink: 0;
+  box-shadow: 0 0 15px currentColor;
 }
 
 .col-heading {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(2.5rem, 5vw, 4.5rem);
-  letter-spacing: .02em; line-height: 1;
-  margin-bottom: 2.5rem;
+  font-family: var(--display);
+  font-size: clamp(2.8rem, 6vw, 5rem);
+  letter-spacing: 0.02em; line-height: 0.95;
+  margin-bottom: 2.8rem;
+  text-shadow: 0 5px 30px rgba(0,0,0,0.4);
 }
 
 .item-row {
-  display: flex; align-items: flex-start; gap: 1rem;
-  padding: .9rem 0;
-  border-bottom: 1px solid var(--gray2);
-  opacity: 0; transform: translateX(-20px);
-  transition: opacity .5s, transform .5s;
+  display: flex; align-items: flex-start; gap: 1.2rem;
+  padding: 1rem 1.2rem;
+  margin: 0.3rem 0;
+  border-radius: 8px;
+  border-left: 3px solid transparent;
+  transition: all var(--transition);
+  opacity: 0; transform: translateX(-25px);
+  background: rgba(255,255,255,0.02);
 }
-.item-row.visible { opacity: 1; transform: none; }
-.col-solution .item-row { transform: translateX(20px); }
-.col-solution .item-row.visible { transform: none; }
+
+.item-row.visible { opacity: 1; transform: translateX(0); }
+
+.item-row:hover {
+  background: rgba(255,255,255,0.06);
+  border-left-color: var(--red);
+  transform: translateX(5px);
+}
+
+.col-solution .item-row { 
+  transform: translateX(25px); 
+  border-left-color: var(--green);
+}
+
+.col-solution .item-row:hover {
+  background: rgba(6, 214, 160, 0.08);
+  transform: translateX(-5px);
+}
+
+.col-solution .item-row.visible { transform: translateX(0); }
 
 .item-icon {
-  width: 28px; height: 28px; flex-shrink: 0;
-  border-radius: 4px; display: grid; place-items: center;
-  font-size: 1rem; margin-top: .1rem;
+  width: 32px; height: 32px; flex-shrink: 0;
+  border-radius: 6px; display: grid; place-items: center;
+  font-size: 1.1rem; margin-top: 0.2rem;
+  background: var(--bg3);
+  border: 1px solid var(--gray2);
+  transition: transform var(--transition);
 }
+
+.item-row:hover .item-icon {
+  transform: scale(1.1);
+}
+
 .item-text { font-size: 1rem; font-weight: 400; line-height: 1.5; }
-.item-text strong { display: block; font-weight: 600; font-size: .95rem; margin-bottom: .1rem; }
-.item-sub { font-size: .85rem; color: var(--gray); }
+.item-text strong { 
+  display: block; font-weight: 600; font-size: 0.98rem; 
+  margin-bottom: 0.2rem; color: var(--white);
+}
+.item-sub { font-size: 0.87rem; color: var(--gray); }
 
 .vs-divider {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
   z-index: 10;
-  width: 54px; height: 54px;
+  width: 60px; height: 60px;
   background: var(--bg);
   border: 2px solid var(--red);
   border-radius: 50%;
   display: grid; place-items: center;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.1rem; letter-spacing: .1em;
+  font-family: var(--display);
+  font-size: 1.2rem; letter-spacing: 0.12em;
   color: var(--red);
-  box-shadow: 0 0 30px rgba(230,57,70,.4);
+  box-shadow: var(--shadow-glow), 0 0 60px rgba(230,57,70,0.2);
+  animation: pulseBorder 2s ease-in-out infinite;
+}
+
+@keyframes pulseBorder {
+  0%, 100% { box-shadow: var(--shadow-glow), 0 0 60px rgba(230,57,70,0.2); }
+  50% { box-shadow: 0 0 30px rgba(230,57,70,0.4), 0 0 80px rgba(230,57,70,0.15); }
 }
 
 /* ════════════════════════════════════════════════
-   SLIDE 3 — FUNZIONALITÀ
+   SLIDE 3 — FUNZIONALITÀ (CARD MIGLIORATE)
 ════════════════════════════════════════════════ */
 #s3 {
-  background: var(--bg);
+  background: 
+    radial-gradient(ellipse at 50% 0%, rgba(78,205,196,0.06) 0%, transparent 50%),
+    var(--bg);
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0 5vw;
-  gap: 3rem;
+  padding: 0 4vw;
+  gap: 3.5rem;
 }
 
 .section-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(2.5rem, 6vw, 5rem);
-  letter-spacing: .04em;
+  font-family: var(--display);
+  font-size: clamp(2.8rem, 7vw, 5.5rem);
+  letter-spacing: 0.04em;
   text-align: center;
   position: relative;
+  margin-bottom: 1rem;
 }
+
 .section-title .num {
   font-family: var(--mono);
-  font-size: .8rem;
+  font-size: 0.82rem;
   color: var(--red);
-  letter-spacing: .2em;
+  letter-spacing: 0.25em;
   display: block;
   text-align: center;
-  margin-bottom: .5rem;
+  margin-bottom: 0.6rem;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.section-title .num::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 60px; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--red), transparent);
 }
 
 .feat-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5px;
-  width: 100%; max-width: 1100px;
+  gap: 1px;
+  width: 100%; max-width: 1150px;
   background: var(--gray2);
-  border: 1.5px solid var(--gray2);
+  border: 1px solid var(--gray2);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
 }
+
 .feat-card {
   background: var(--bg2);
-  padding: 1.8rem 1.8rem 2rem;
+  padding: 2rem;
   position: relative;
   overflow: hidden;
-  cursor: default;
-  transition: background .3s;
+  transition: all var(--transition);
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
 }
-.feat-card:hover { background: var(--bg3); }
+
 .feat-card::before {
   content: '';
   position: absolute; top: 0; left: 0; right: 0;
   height: 3px;
-  opacity: 0; transition: opacity .3s;
+  background: linear-gradient(90deg, var(--c, var(--teal)), transparent);
+  opacity: 0; transition: opacity var(--transition);
 }
-.feat-card:hover::before { opacity: 1; }
 
-.feat-num {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 4rem; line-height: 1;
-  color: var(--gray2);
-  position: absolute; top: .5rem; right: 1rem;
-  transition: color .3s;
+.feat-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(600px circle at var(--x, 50%) var(--y, 50%), 
+    rgba(255,255,255,0.06), transparent 40%);
+  opacity: 0;
+  transition: opacity var(--transition);
   pointer-events: none;
 }
-.feat-card:hover .feat-num { color: var(--gray); }
+
+.feat-card:hover {
+  background: var(--bg3);
+  transform: translateY(-4px);
+  z-index: 2;
+  box-shadow: var(--shadow-md);
+}
+
+.feat-card:hover::before { opacity: 1; }
+.feat-card:hover::after { opacity: 1; }
+
+.feat-num {
+  font-family: var(--display);
+  font-size: 4.5rem; line-height: 1;
+  color: var(--gray3);
+  position: absolute; top: 0.3rem; right: 1.2rem;
+  transition: color var(--transition);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.feat-card:hover .feat-num { color: var(--gray2); opacity: 1; }
 
 .feat-icon-wrap {
-  width: 42px; height: 42px;
-  border-radius: 8px;
+  width: 48px; height: 48px;
+  border-radius: 10px;
   display: grid; place-items: center;
-  font-size: 1.3rem;
-  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  margin-bottom: 1.2rem;
+  background: var(--bg3);
+  border: 1px solid var(--gray2);
+  transition: all var(--transition);
 }
+
+.feat-card:hover .feat-icon-wrap {
+  transform: scale(1.1) rotate(5deg);
+  border-color: var(--c, var(--teal));
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
 .feat-name {
-  font-weight: 700; font-size: 1.05rem;
-  margin-bottom: .4rem;
-  text-transform: uppercase; letter-spacing: .06em;
+  font-weight: 700; font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--white);
 }
-.feat-desc { font-size: .88rem; color: var(--gray); line-height: 1.6; }
+
+.feat-desc { 
+  font-size: 0.9rem; color: var(--gray); 
+  line-height: 1.65; 
+  flex-grow: 1;
+}
 
 /* ════════════════════════════════════════════════
-   SLIDE 4 — STACK
+   SLIDE 4 — STACK (CARD CON EFFETTI)
 ════════════════════════════════════════════════ */
 #s4 {
-  background: var(--bg2);
+  background: 
+    radial-gradient(ellipse at 80% 30%, rgba(255,217,61,0.04) 0%, transparent 50%),
+    var(--bg2);
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0 5vw;
-  gap: 3rem;
+  padding: 0 4vw;
+  gap: 3.5rem;
 }
 
 .stack-grid {
   display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem; width: 100%; max-width: 1100px;
+  gap: 1.5rem; width: 100%; max-width: 1150px;
 }
+
 .stack-card {
-  background: var(--bg3);
+  background: linear-gradient(145deg, var(--bg3), var(--bg4));
   border: 1px solid var(--gray2);
-  padding: 2rem 2rem 2.5rem;
+  padding: 2.2rem;
   position: relative; overflow: hidden;
-  transition: border-color .3s, transform .3s;
+  transition: all var(--transition);
+  border-radius: 12px;
 }
-.stack-card:hover { border-color: var(--red); transform: translateY(-4px); }
+
+.stack-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gray), transparent);
+}
 
 .stack-card::after {
   content: '';
   position: absolute; bottom: 0; left: 0; right: 0;
   height: 3px;
+  background: linear-gradient(90deg, var(--accent, var(--teal)), transparent);
   transform: scaleX(0); transform-origin: left;
-  transition: transform .4s ease;
+  transition: transform 0.4s var(--ease);
 }
+
+.stack-card:hover { 
+  border-color: var(--accent, var(--teal)); 
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-md);
+}
+
 .stack-card:hover::after { transform: scaleX(1); }
 
 .stack-header {
-  display: flex; align-items: center; gap: .9rem;
-  margin-bottom: 1.8rem;
-  padding-bottom: 1.2rem;
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.4rem;
   border-bottom: 1px solid var(--gray2);
 }
+
 .stack-icon {
-  font-size: 1.8rem; line-height: 1;
+  font-size: 2rem; line-height: 1;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
 }
+
 .stack-name {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.8rem; letter-spacing: .04em;
+  font-family: var(--display);
+  font-size: 2rem; letter-spacing: 0.04em;
 }
-.stack-items { list-style: none; display: flex; flex-direction: column; gap: .7rem; }
+
+.stack-items { list-style: none; display: flex; flex-direction: column; gap: 0.9rem; }
+
 .stack-items li {
-  font-size: .92rem; color: var(--white);
-  display: flex; align-items: center; gap: .6rem;
+  font-size: 0.94rem; color: var(--white);
+  display: flex; align-items: center; gap: 0.7rem;
+  padding: 0.3rem 0;
+  transition: transform var(--transition-fast);
 }
+
+.stack-items li:hover {
+  transform: translateX(4px);
+}
+
 .stack-items li::before {
   content: '';
-  width: 4px; height: 4px; border-radius: 50%;
+  width: 5px; height: 5px; border-radius: 50%;
   flex-shrink: 0;
+  background: var(--dot, var(--teal));
+  box-shadow: 0 0 10px var(--dot, var(--teal));
 }
 
 /* ════════════════════════════════════════════════
@@ -422,124 +818,174 @@ body::after {
   background: var(--bg);
   align-items: center;
   justify-content: center;
-  padding: 0 5vw;
-  gap: 4vw;
+  padding: 0 4vw;
+  gap: 3vw;
 }
 
 .arch-left {
-  flex: 0 0 280px;
-  display: flex; flex-direction: column; gap: 0;
+  flex: 0 0 300px;
+  display: flex; flex-direction: column; gap: 0.5rem;
 }
+
 .tier-box {
-  padding: 1.2rem 1.4rem;
+  padding: 1.4rem 1.6rem;
   border: 1px solid var(--gray2);
   position: relative;
-  transition: border-color .3s;
+  transition: all var(--transition);
+  border-radius: 8px;
+  background: var(--bg3);
 }
-.tier-box:hover { border-color: inherit; }
+
+.tier-box:hover { 
+  border-color: inherit; 
+  transform: translateX(8px);
+  box-shadow: var(--shadow-sm);
+}
+
 .tier-name {
-  font-weight: 700; font-size: 1rem; letter-spacing: .04em;
+  font-weight: 700; font-size: 1.05rem; letter-spacing: 0.04em;
 }
-.tier-sub { font-size: .78rem; color: var(--gray); margin-top: .2rem; font-family: var(--mono); }
+
+.tier-sub { 
+  font-size: 0.8rem; color: var(--gray); 
+  margin-top: 0.3rem; font-family: var(--mono); 
+}
 
 .tier-arrow {
-  height: 36px; width: 1px;
-  background: var(--gray2);
+  height: 40px; width: 2px;
+  background: linear-gradient(180deg, var(--gray2), var(--gray), var(--gray2));
   margin: 0 auto;
   position: relative;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
+
 .tier-arrow-label {
-  font-family: var(--mono); font-size: .65rem; color: var(--gray);
-  letter-spacing: .1em; text-transform: uppercase;
+  font-family: var(--mono); font-size: 0.68rem; color: var(--gray);
+  letter-spacing: 0.12em; text-transform: uppercase;
   white-space: nowrap;
-  margin-left: 10px;
-  margin-top: -18px;
+  margin-left: 14px;
+  margin-top: -20px;
+  background: var(--bg);
+  padding: 0 0.5rem;
 }
+
 .tier-arrow::after {
-  content: '↓'; color: var(--gray); font-size: .9rem;
-  position: absolute; bottom: -2px;
+  content: ''; 
+  position: absolute; bottom: -6px;
+  width: 0; height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid var(--gray);
 }
 
 .arch-right {
-  flex: 1; max-width: 650px;
+  flex: 1; max-width: 680px;
 }
+
 .api-title {
-  font-family: var(--mono); font-size: .72rem; color: var(--gray);
-  letter-spacing: .2em; text-transform: uppercase;
-  margin-bottom: 1.2rem;
-  display: flex; align-items: center; gap: .8rem;
+  font-family: var(--mono); font-size: 0.75rem; color: var(--gray);
+  letter-spacing: 0.22em; text-transform: uppercase;
+  margin-bottom: 1.4rem;
+  display: flex; align-items: center; gap: 1rem;
 }
+
 .api-title::after { content: ''; flex: 1; height: 1px; background: var(--gray2); }
 
 .api-row {
-  display: grid; grid-template-columns: 68px 1fr auto;
-  align-items: center; gap: 1rem;
-  padding: .75rem .8rem;
-  border-radius: 4px;
-  margin-bottom: 4px;
-  transition: background .2s;
-  cursor: default;
+  display: grid; grid-template-columns: 75px 1fr auto;
+  align-items: center; gap: 1.2rem;
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 0.4rem;
+  transition: all var(--transition-fast);
+  cursor: none;
+  background: transparent;
 }
-.api-row:hover { background: var(--bg3); }
+
+.api-row:hover { 
+  background: var(--bg3); 
+  transform: translateX(4px);
+}
 
 .method-badge {
-  font-family: var(--mono); font-size: .7rem; font-weight: 700;
-  text-align: center; padding: .28rem .4rem;
-  border-radius: 3px; letter-spacing: .05em;
+  font-family: var(--mono); font-size: 0.72rem; font-weight: 700;
+  text-align: center; padding: 0.35rem 0.6rem;
+  border-radius: 4px; letter-spacing: 0.06em;
+  border: 1px solid transparent;
 }
-.m-post { background: rgba(230,57,70,.15); color: var(--red); border: 1px solid rgba(230,57,70,.3); }
-.m-get  { background: rgba(78,205,196,.12); color: var(--teal); border: 1px solid rgba(78,205,196,.3); }
-.m-all  { background: rgba(255,217,61,.12); color: var(--gold); border: 1px solid rgba(255,217,61,.3); }
 
-.api-path { font-family: var(--mono); font-size: .85rem; }
-.api-desc { font-size: .8rem; color: var(--gray); text-align: right; white-space: nowrap; }
+.m-post { background: rgba(230,57,70,0.15); color: var(--red); border-color: rgba(230,57,70,0.4); }
+.m-get  { background: rgba(78,205,196,0.12); color: var(--teal); border-color: rgba(78,205,196,0.4); }
+.m-all  { background: rgba(255,217,61,0.12); color: var(--gold); border-color: rgba(255,217,61,0.4); }
+
+.api-path { font-family: var(--mono); font-size: 0.88rem; color: var(--white); }
+.api-desc { font-size: 0.82rem; color: var(--gray); text-align: right; }
 
 /* ════════════════════════════════════════════════
    SLIDE 6 — SCHEMA DATI
 ════════════════════════════════════════════════ */
 #s6 {
-  background: var(--bg2);
+  background: 
+    radial-gradient(ellipse at 20% 80%, rgba(230,57,70,0.05) 0%, transparent 50%),
+    var(--bg2);
   align-items: center;
   justify-content: center;
-  padding: 0 5vw;
-  gap: 3rem;
+  padding: 0 4vw;
+  gap: 3.5rem;
   flex-direction: column;
 }
 
 .schema-grid {
   display: grid; grid-template-columns: 1fr 1fr;
-  gap: 3rem; width: 100%; max-width: 900px;
+  gap: 2.5rem; width: 100%; max-width: 950px;
 }
+
 .table-card {
   border: 1px solid var(--gray2);
   overflow: hidden;
-  transition: border-color .3s;
+  transition: all var(--transition);
+  border-radius: 12px;
+  background: var(--bg3);
 }
-.table-card:hover { border-color: var(--red); }
+
+.table-card:hover { 
+  border-color: var(--red); 
+  box-shadow: 0 0 0 1px var(--red), var(--shadow-md);
+}
 
 .table-head {
-  display: flex; align-items: center; gap: .8rem;
-  padding: 1rem 1.4rem;
-  font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: .06em;
+  display: flex; align-items: center; gap: 0.9rem;
+  padding: 1.2rem 1.6rem;
+  font-family: var(--display); font-size: 1.7rem; letter-spacing: 0.06em;
+  background: var(--bg4);
+  border-bottom: 1px solid var(--gray2);
 }
+
 .table-body { display: flex; flex-direction: column; }
 
 .table-row {
   display: flex; justify-content: space-between; align-items: center;
-  padding: .6rem 1.4rem;
+  padding: 0.75rem 1.6rem;
   border-top: 1px solid var(--gray2);
-  font-size: .88rem;
+  font-size: 0.9rem;
+  transition: background var(--transition-fast);
 }
-.table-row:nth-child(even) { background: rgba(255,255,255,.02); }
-.field-name { font-family: var(--mono); font-weight: 700; font-size: .82rem; }
-.field-pk { color: var(--gold); }
-.field-type { color: var(--gray); font-size: .78rem; }
+
+.table-row:hover { background: rgba(255,255,255,0.04); }
+.table-row:nth-child(even) { background: rgba(255,255,255,0.02); }
+
+.field-name { font-family: var(--mono); font-weight: 700; font-size: 0.85rem; }
+.field-pk { color: var(--gold); text-shadow: 0 0 10px rgba(255,217,61,0.3); }
+.field-type { color: var(--gray); font-size: 0.8rem; font-family: var(--mono); }
 
 .schema-note {
-  font-size: .85rem; color: var(--gray);
+  font-size: 0.88rem; color: var(--gray);
   text-align: center; font-family: var(--mono);
-  letter-spacing: .05em;
+  letter-spacing: 0.06em;
+  padding: 1rem 2rem;
+  background: var(--bg3);
+  border-radius: 8px;
+  border: 1px dashed var(--gray2);
 }
 
 /* ════════════════════════════════════════════════
@@ -550,214 +996,404 @@ body::after {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0 5vw;
-  gap: 3rem;
+  padding: 0 4vw;
+  gap: 3.5rem;
 }
 
 .sec-grid {
   display: grid; grid-template-columns: 1fr 1fr;
   gap: 1px; background: var(--gray2);
   border: 1px solid var(--gray2);
-  width: 100%; max-width: 1000px;
+  border-radius: 12px;
+  width: 100%; max-width: 1050px;
+  overflow: hidden;
 }
+
 .sec-card {
   background: var(--bg2);
-  padding: 2.5rem 2.5rem 2.8rem;
+  padding: 2.5rem;
   position: relative; overflow: hidden;
-  transition: background .3s;
+  transition: all var(--transition);
 }
-.sec-card:hover { background: var(--bg3); }
+
+.sec-card:hover { 
+  background: var(--bg3); 
+  transform: translateY(-3px);
+}
 
 .sec-card-num {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 6rem; color: var(--bg3);
-  position: absolute; right: 1.5rem; top: .5rem;
+  font-family: var(--display);
+  font-size: 7rem; color: var(--bg3);
+  position: absolute; right: 1.2rem; top: 0.3rem;
   line-height: 1;
-  transition: color .3s;
+  transition: color var(--transition);
   pointer-events: none;
+  opacity: 0.4;
 }
-.sec-card:hover .sec-card-num { color: var(--gray2); }
 
-.sec-icon { font-size: 2rem; margin-bottom: 1rem; }
+.sec-card:hover .sec-card-num { color: var(--gray3); opacity: 0.8; }
+
+.sec-icon { font-size: 2.2rem; margin-bottom: 1.2rem; }
 .sec-title {
-  font-weight: 700; font-size: 1.1rem; text-transform: uppercase;
-  letter-spacing: .08em; margin-bottom: .8rem;
+  font-weight: 700; font-size: 1.15rem; text-transform: uppercase;
+  letter-spacing: 0.1em; margin-bottom: 1rem;
 }
-.sec-text { font-size: .92rem; color: var(--gray); line-height: 1.7; }
+.sec-text { font-size: 0.94rem; color: var(--gray); line-height: 1.75; }
+
+.sec-text code {
+  font-family: var(--mono); font-size: 0.85rem;
+  background: var(--bg4); padding: 0.2rem 0.4rem;
+  border-radius: 3px; border: 1px solid var(--gray2);
+}
 
 /* ════════════════════════════════════════════════
    SLIDE 8 — LIVE DEMO
 ════════════════════════════════════════════════ */
 #s8 {
-  background: var(--bg2);
+  background: 
+    radial-gradient(ellipse at 50% 100%, rgba(78,205,196,0.05) 0%, transparent 50%),
+    var(--bg2);
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0 5vw;
-  gap: 3rem;
+  padding: 0 4vw;
+  gap: 3.5rem;
 }
 
 .demo-grid {
   display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 1rem; width: 100%; max-width: 1000px;
+  gap: 1.2rem; width: 100%; max-width: 1050px;
 }
+
 .demo-card {
   border: 1px solid var(--gray2);
-  padding: 1.8rem;
+  padding: 2rem;
   position: relative;
   overflow: hidden;
-  transition: border-color .3s, transform .2s;
-  cursor: default;
+  transition: all var(--transition);
+  cursor: none;
+  border-radius: 10px;
+  background: var(--bg3);
 }
-.demo-card:hover { border-color: inherit; transform: translateY(-3px); }
+
+.demo-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--border-color, var(--teal)), transparent);
+  opacity: 0; transition: opacity var(--transition);
+}
+
+.demo-card:hover { 
+  border-color: var(--border-color, var(--teal)); 
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.demo-card:hover::before { opacity: 1; }
 
 .demo-num {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 2.8rem; line-height: 1;
-  margin-bottom: .8rem;
+  font-family: var(--display);
+  font-size: 3.2rem; line-height: 1;
+  margin-bottom: 1rem;
+  opacity: 0.9;
 }
-.demo-title { font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .6rem; }
-.demo-text { font-size: .82rem; color: var(--gray); line-height: 1.6; }
+
+.demo-title { 
+  font-weight: 700; font-size: 1.05rem; 
+  text-transform: uppercase; letter-spacing: 0.1em; 
+  margin-bottom: 0.8rem;
+}
+
+.demo-text { font-size: 0.88rem; color: var(--gray); line-height: 1.65; }
+.demo-text code {
+  font-family: var(--mono); font-size: 0.8rem;
+  background: var(--bg4); padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+}
 
 /* ════════════════════════════════════════════════
    SLIDE 9 — CONCLUSIONI
 ════════════════════════════════════════════════ */
 #s9 {
-  background: var(--bg);
+  background: 
+    radial-gradient(ellipse at 30% 50%, rgba(230,57,70,0.08) 0%, transparent 50%),
+    var(--bg);
   align-items: center;
   justify-content: center;
-  padding: 0 5vw;
-  gap: 5rem;
+  padding: 0 4vw;
+  gap: 4rem;
 }
 
 .concl-left {
-  flex: 1; max-width: 450px;
+  flex: 1; max-width: 480px;
 }
-.concl-heading {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(3rem, 7vw, 6rem);
-  line-height: .9; margin-bottom: 2rem;
-}
-.concl-heading span { color: var(--red); }
 
-.check-list { list-style: none; display: flex; flex-direction: column; gap: .9rem; }
-.check-list li {
-  display: flex; align-items: center; gap: .9rem;
-  font-size: 1rem; font-weight: 400;
+.concl-heading {
+  font-family: var(--display);
+  font-size: clamp(3.2rem, 8vw, 6.5rem);
+  line-height: 0.9; margin-bottom: 2.5rem;
 }
+
+.concl-heading span { 
+  color: var(--red); 
+  position: relative;
+}
+
+.concl-heading span::after {
+  content: '';
+  position: absolute;
+  bottom: 12px; left: 0; right: 0;
+  height: 6px;
+  background: var(--red);
+  border-radius: 3px;
+  opacity: 0.3;
+  filter: blur(4px);
+}
+
+.check-list { list-style: none; display: flex; flex-direction: column; gap: 1.1rem; }
+
+.check-list li {
+  display: flex; align-items: center; gap: 1.1rem;
+  font-size: 1.05rem; font-weight: 400;
+  padding: 0.5rem 0;
+}
+
 .check-list li::before {
   content: '✓';
   display: inline-flex; align-items: center; justify-content: center;
-  width: 24px; height: 24px; flex-shrink: 0;
-  background: rgba(6,214,160,.15);
+  width: 28px; height: 28px; flex-shrink: 0;
+  background: rgba(6,214,160,0.15);
   color: var(--green);
-  border: 1px solid rgba(6,214,160,.3);
-  border-radius: 50%; font-size: .8rem; font-weight: 700;
+  border: 2px solid rgba(6,214,160,0.4);
+  border-radius: 50%; font-size: 0.85rem; font-weight: 700;
+  box-shadow: 0 0 15px rgba(6,214,160,0.2);
 }
 
-.concl-right { flex: 1; max-width: 450px; }
+.concl-right { flex: 1; max-width: 480px; }
 
 .future-title {
-  font-family: var(--mono); font-size: .75rem; letter-spacing: .2em;
+  font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.22em;
   color: var(--red); text-transform: uppercase;
-  margin-bottom: 1.5rem; display: flex; align-items: center; gap: .8rem;
+  margin-bottom: 1.8rem; display: flex; align-items: center; gap: 1rem;
 }
-.future-title::before { content: '→'; font-size: 1rem; }
+
+.future-title::before { 
+  content: '→'; font-size: 1.2rem; 
+  animation: arrowBounce 1.5s ease-in-out infinite;
+}
+
+@keyframes arrowBounce {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+}
 
 .future-list { list-style: none; display: flex; flex-direction: column; gap: 0; }
-.future-item {
-  display: flex; align-items: center; gap: 1.2rem;
-  padding: 1rem 0;
-  border-bottom: 1px solid var(--gray2);
-  font-size: .95rem;
-  transition: padding-left .2s;
-  cursor: default;
-}
-.future-item:hover { padding-left: .5rem; }
-.future-arrow { color: var(--red); font-family: var(--mono); font-size: .9rem; opacity: .6; }
 
-/* footer bar */
+.future-item {
+  display: flex; align-items: center; gap: 1.4rem;
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--gray2);
+  font-size: 0.98rem;
+  transition: all var(--transition-fast);
+  cursor: none;
+}
+
+.future-item:hover { 
+  padding-left: 0.8rem; 
+  background: rgba(255,255,255,0.02);
+  border-left: 3px solid var(--red);
+  margin-left: -3px;
+}
+
+.future-arrow { 
+  color: var(--red); font-family: var(--mono); font-size: 1rem; 
+  opacity: 0.7; transition: transform var(--transition-fast);
+}
+
+.future-item:hover .future-arrow {
+  transform: translateX(4px);
+  opacity: 1;
+}
+
+/* Footer bar migliorato */
 .footer-bar {
   position: absolute; bottom: 0; left: 0; right: 0;
-  height: 56px;
-  background: var(--red);
+  height: 60px;
+  background: linear-gradient(90deg, var(--bg), var(--red), var(--bg));
+  background-size: 200% 100%;
+  animation: gradientShift 4s ease infinite;
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.2rem; letter-spacing: .2em;
-  gap: 2rem;
+  font-family: var(--display);
+  font-size: 1.1rem; letter-spacing: 0.18em;
+  gap: 2.5rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
 }
-.footer-dot { width: 4px; height: 4px; background: rgba(255,255,255,.4); border-radius: 50%; }
 
-/* ── Shared reveal animation ── */
+.footer-dot { 
+  width: 5px; height: 5px; 
+  background: rgba(255,255,255,0.5); 
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.footer-dot:nth-child(2) { animation-delay: 0.5s; }
+
+/* ════════════════════════════════════════════════
+   REVEAL ANIMATIONS & UTILS
+════════════════════════════════════════════════ */
 .reveal {
-  opacity: 0; transform: translateY(24px);
-  transition: opacity .7s, transform .7s;
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+  will-change: opacity, transform;
 }
-.reveal.visible { opacity: 1; transform: none; }
 
-/* ── Color helpers ── */
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* Color helpers */
 .c-red   { color: var(--red); }
 .c-teal  { color: var(--teal); }
 .c-gold  { color: var(--gold); }
 .c-green { color: var(--green); }
-.bg-red  { background: rgba(230,57,70,.18); }
-.bg-teal { background: rgba(78,205,196,.15); }
-.bg-gold { background: rgba(255,217,61,.15); }
-.bg-green{ background: rgba(6,214,160,.15); }
+
+.bg-red  { background: rgba(230,57,70,0.15); }
+.bg-teal { background: rgba(78,205,196,0.12); }
+.bg-gold { background: rgba(255,217,61,0.12); }
+.bg-green{ background: rgba(6,214,160,0.12); }
+
 .bar-red  { border-left: 3px solid var(--red); }
 .bar-teal { border-left: 3px solid var(--teal); }
 .bar-gold { border-left: 3px solid var(--gold); }
 .bar-green{ border-left: 3px solid var(--green); }
-.after-red::after   { background: var(--red); }
-.after-teal::after  { background: var(--teal); }
-.after-gold::after  { background: var(--gold); }
-.after-green::after { background: var(--green); }
-.head-red   { background: rgba(230,57,70,.2); }
-.head-teal  { background: rgba(78,205,196,.15); }
+
+.head-red   { background: rgba(230,57,70,0.12); }
+.head-teal  { background: rgba(78,205,196,0.1); }
+
+/* ════════════════════════════════════════════════
+   RESPONSIVE DESIGN
+════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .feat-grid, .stack-grid, .demo-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .two-col {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  
+  .col-problem { border-right: none; border-bottom: 1px solid var(--gray2); }
+  .vs-divider { position: relative; left: auto; top: auto; transform: none; margin: 2rem auto; }
+  
+  .schema-grid { grid-template-columns: 1fr; }
+  .sec-grid { grid-template-columns: 1fr; }
+  
+  #s9 { flex-direction: column; text-align: center; }
+  .concl-left, .concl-right { max-width: 100%; }
+  .check-list li { justify-content: center; }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --blur-lg: blur(60px);
+  }
+  
+  section { padding: 1.5rem; }
+  
+  #nav-dots { right: 1rem; }
+  .dot { width: 9px; height: 9px; }
+  
+  .hero-title { font-size: clamp(3rem, 18vw, 8rem); }
+  .hero-sub { font-size: 1rem; max-width: 100%; }
+  
+  .feat-grid, .stack-grid, .demo-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .col-heading { font-size: clamp(2.2rem, 8vw, 3.5rem); }
+  
+  .api-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    text-align: center;
+  }
+  
+  .api-desc { text-align: center; }
+  
+  .footer-bar {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 0.8rem;
+    font-size: 0.9rem;
+    gap: 1rem;
+  }
+  
+  /* Nascondi cursor custom su touch */
+  .cursor, .cursor-ring { display: none; }
+  body { cursor: auto; }
+  a, button, [onclick] { cursor: pointer !important; }
+}
+
+/* Focus visible per accessibilità */
+:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 3px;
+}
+
+/* Stampa */
+@media print {
+  .cursor, .cursor-ring, #progress, #nav-dots, 
+  .orb, .grid-bg, body::after { display: none !important; }
+  section { height: auto; min-height: auto; scroll-snap-align: none; }
+  body { background: white; color: black; cursor: auto; }
+}
 </style>
 </head>
 <body>
 
 <div class="cursor" id="cursor"></div>
 <div class="cursor-ring" id="cursorRing"></div>
-<div id="progress"></div>
+<div id="progress" aria-hidden="true"></div>
 
-<!-- Nav dots -->
-<div id="nav-dots">
-  <div class="dot active" onclick="scrollTo(0)" title="Intro"></div>
-  <div class="dot" onclick="scrollTo(1)" title="Problema"></div>
-  <div class="dot" onclick="scrollTo(2)" title="Funzionalità"></div>
-  <div class="dot" onclick="scrollTo(3)" title="Stack"></div>
-  <div class="dot" onclick="scrollTo(4)" title="API"></div>
-  <div class="dot" onclick="scrollTo(5)" title="Schema"></div>
-  <div class="dot" onclick="scrollTo(6)" title="Sicurezza"></div>
-  <div class="dot" onclick="scrollTo(7)" title="Demo"></div>
-  <div class="dot" onclick="scrollTo(8)" title="Conclusioni"></div>
-</div>
+<!-- Nav dots con accessibilità -->
+<nav id="nav-dots" aria-label="Navigazione sezioni">
+  <button class="dot active" onclick="scrollTo(0)" title="Intro" aria-label="Vai alla sezione Intro"></button>
+  <button class="dot" onclick="scrollTo(1)" title="Problema" aria-label="Vai alla sezione Problema"></button>
+  <button class="dot" onclick="scrollTo(2)" title="Funzionalità" aria-label="Vai alla sezione Funzionalità"></button>
+  <button class="dot" onclick="scrollTo(3)" title="Stack" aria-label="Vai alla sezione Stack"></button>
+  <button class="dot" onclick="scrollTo(4)" title="API" aria-label="Vai alla sezione API"></button>
+  <button class="dot" onclick="scrollTo(5)" title="Schema" aria-label="Vai alla sezione Schema"></button>
+  <button class="dot" onclick="scrollTo(6)" title="Sicurezza" aria-label="Vai alla sezione Sicurezza"></button>
+  <button class="dot" onclick="scrollTo(7)" title="Demo" aria-label="Vai alla sezione Demo"></button>
+  <button class="dot" onclick="scrollTo(8)" title="Conclusioni" aria-label="Vai alla sezione Conclusioni"></button>
+</nav>
 
 <!-- ═══════════════════ SLIDE 1 — HERO ═══════════════════ -->
-<section id="s1">
-  <div class="grid-bg"></div>
-  <div class="orb orb-red"></div>
-  <div class="orb orb-teal"></div>
+<section id="s1" aria-labelledby="hero-title">
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="orb orb-red" aria-hidden="true"></div>
+  <div class="orb orb-teal" aria-hidden="true"></div>
 
-  <div style="position:relative;z-index:1">
-    <div class="hero-badge">Web App · Concessionarie Auto</div>
-    <div class="hero-title">
-      Sport<span>Car</span><br>
-      <span class="outline">DB</span>
+  <div style="position:relative;z-index:1;max-width:700px">
+    <div class="hero-badge" role="status">
+      <span aria-hidden="true">●</span>
+      Web App · Concessionarie Auto
     </div>
+    <h1 class="hero-title" id="hero-title">
+      Sport<span>Car</span><br>
+      <span class="outline" data-text="DB">DB</span>
+    </h1>
     <p class="hero-sub">Sistema integrato per la gestione del catalogo veicoli, confronto modelli e consulenza automatica con architettura three-tier.</p>
-    <div class="hero-tags">
-      <div class="hero-tag">Catalogo</div>
-      <div class="hero-tag">Confronto</div>
-      <div class="hero-tag">AI Advisor</div>
-      <div class="hero-tag">JWT Auth</div>
-      <div class="hero-tag">Flask API</div>
+    <div class="hero-tags" role="list">
+      <span class="hero-tag" role="listitem">Catalogo</span>
+      <span class="hero-tag" role="listitem">Confronto</span>
+      <span class="hero-tag" role="listitem">AI Advisor</span>
+      <span class="hero-tag" role="listitem">JWT Auth</span>
+      <span class="hero-tag" role="listitem">Flask API</span>
     </div>
   </div>
 
-  <svg class="hero-car" viewBox="0 0 800 300" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+  <svg class="hero-car" viewBox="0 0 800 300" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <path d="M760 200 C760 200 740 160 700 145 L620 130 C620 130 580 80 520 65 L360 55 C320 55 260 75 220 110 L140 140 L60 150 C40 152 20 165 15 185 L10 200 L40 200 C40 200 38 220 55 232 C72 244 95 244 112 232 C129 220 127 200 127 200 L490 200 C490 200 488 220 505 232 C522 244 545 244 562 232 C579 220 577 200 577 200 L760 200 Z"/>
     <ellipse cx="85" cy="218" rx="35" ry="35" fill="none" stroke="currentColor" stroke-width="8"/>
     <ellipse cx="85" cy="218" rx="18" ry="18"/>
@@ -767,72 +1403,72 @@ body::after {
     <path d="M390 85 L510 70 L530 120 L380 140 Z" opacity=".5"/>
   </svg>
 
-  <div class="hero-scroll">
+  <div class="hero-scroll" aria-hidden="true">
     <div class="scroll-line"></div>
     <span>Scorri per esplorare</span>
   </div>
 </section>
 
 <!-- ═══════════════════ SLIDE 2 — PROBLEMA ═══════════════════ -->
-<section id="s2">
-  <div class="grid-bg" style="opacity:.4"></div>
+<section id="s2" aria-labelledby="problem-title">
+  <div class="grid-bg" style="opacity:.4" aria-hidden="true"></div>
   <div class="two-col">
     <div class="col-problem">
       <div class="col-label">
-        <div class="col-label-dot" style="background:var(--red)"></div>
+        <div class="col-label-dot" style="background:var(--red)" aria-hidden="true"></div>
         <span class="c-red">Prima</span>
       </div>
-      <div class="col-heading">Senza<br>SportCarDB</div>
+      <h2 class="col-heading" id="problem-title">Senza<br>SportCarDB</h2>
 
-      <div class="item-row reveal">
-        <div class="item-icon bg-red">❌</div>
+      <div class="item-row reveal" role="listitem">
+        <div class="item-icon bg-red" aria-hidden="true">❌</div>
         <div class="item-text"><strong>Catalogo disperso</strong><span class="item-sub">Difficile da filtrare, nessuna ricerca avanzata</span></div>
       </div>
-      <div class="item-row reveal" style="transition-delay:.1s">
-        <div class="item-icon bg-red">❌</div>
+      <div class="item-row reveal" style="transition-delay:.1s" role="listitem">
+        <div class="item-icon bg-red" aria-hidden="true">❌</div>
         <div class="item-text"><strong>Nessun confronto</strong><span class="item-sub">Comparazione modelli solo manuale</span></div>
       </div>
-      <div class="item-row reveal" style="transition-delay:.2s">
-        <div class="item-icon bg-red">❌</div>
+      <div class="item-row reveal" style="transition-delay:.2s" role="listitem">
+        <div class="item-icon bg-red" aria-hidden="true">❌</div>
         <div class="item-text"><strong>Suggerimenti incoerenti</strong><span class="item-sub">Raccomandazioni soggettive e imprecise</span></div>
       </div>
-      <div class="item-row reveal" style="transition-delay:.3s">
-        <div class="item-icon bg-red">❌</div>
+      <div class="item-row reveal" style="transition-delay:.3s" role="listitem">
+        <div class="item-icon bg-red" aria-hidden="true">❌</div>
         <div class="item-text"><strong>Nessuna gestione ruoli</strong><span class="item-sub">Accesso non differenziato per ruolo</span></div>
       </div>
-      <div class="item-row reveal" style="transition-delay:.4s">
-        <div class="item-icon bg-red">❌</div>
+      <div class="item-row reveal" style="transition-delay:.4s" role="listitem">
+        <div class="item-icon bg-red" aria-hidden="true">❌</div>
         <div class="item-text"><strong>Dati non centralizzati</strong><span class="item-sub">Informazioni sparse e inconsistenti</span></div>
       </div>
     </div>
 
-    <div class="vs-divider">VS</div>
+    <div class="vs-divider" aria-label="Versus">VS</div>
 
-    <div class="col-solution" style="padding-left:5vw">
+    <div class="col-solution" style="padding-left:3vw">
       <div class="col-label">
-        <div class="col-label-dot" style="background:var(--green)"></div>
+        <div class="col-label-dot" style="background:var(--green)" aria-hidden="true"></div>
         <span class="c-green">Dopo</span>
       </div>
-      <div class="col-heading">Con<br>SportCarDB</div>
+      <h2 class="col-heading">Con<br>SportCarDB</h2>
 
-      <div class="item-row reveal" style="transition-delay:.05s">
-        <div class="item-icon bg-green">✅</div>
+      <div class="item-row reveal" style="transition-delay:.05s" role="listitem">
+        <div class="item-icon bg-green" aria-hidden="true">✅</div>
         <div class="item-text"><strong>Filtri avanzati</strong><span class="item-sub">Per marca, prezzo, HP, categoria e altro</span></div>
       </div>
-      <div class="item-row reveal" style="transition-delay:.15s">
-        <div class="item-icon bg-green">✅</div>
+      <div class="item-row reveal" style="transition-delay:.15s" role="listitem">
+        <div class="item-icon bg-green" aria-hidden="true">✅</div>
         <div class="item-text"><strong>Confronto affiancato</strong><span class="item-sub">Specs complete di due veicoli side-by-side</span></div>
       </div>
-      <div class="item-row reveal" style="transition-delay:.25s">
-        <div class="item-icon bg-green">✅</div>
+      <div class="item-row reveal" style="transition-delay:.25s" role="listitem">
+        <div class="item-icon bg-green" aria-hidden="true">✅</div>
         <div class="item-text"><strong>Consigliatore automatico</strong><span class="item-sub">Punteggio di compatibilità oggettivo</span></div>
       </div>
-      <div class="item-row reveal" style="transition-delay:.35s">
-        <div class="item-icon bg-green">✅</div>
+      <div class="item-row reveal" style="transition-delay:.35s" role="listitem">
+        <div class="item-icon bg-green" aria-hidden="true">✅</div>
         <div class="item-text"><strong>Ruoli Admin / User</strong><span class="item-sub">Autenticazione JWT con permessi granulari</span></div>
       </div>
-      <div class="item-row reveal" style="transition-delay:.45s">
-        <div class="item-icon bg-green">✅</div>
+      <div class="item-row reveal" style="transition-delay:.45s" role="listitem">
+        <div class="item-icon bg-green" aria-hidden="true">✅</div>
         <div class="item-text"><strong>Architettura scalabile</strong><span class="item-sub">Three-tier pronto per PostgreSQL</span></div>
       </div>
     </div>
@@ -840,136 +1476,133 @@ body::after {
 </section>
 
 <!-- ═══════════════════ SLIDE 3 — FUNZIONALITÀ ═══════════════════ -->
-<section id="s3">
-  <div class="orb" style="width:400px;height:400px;background:var(--teal);left:-100px;top:50%;transform:translateY(-50%);opacity:.06;filter:blur(100px)"></div>
-  <div class="section-title reveal">
+<section id="s3" aria-labelledby="features-title">
+  <div class="orb" style="width:400px;height:400px;background:var(--teal);left:-100px;top:50%;transform:translateY(-50%);opacity:.06;filter:blur(100px)" aria-hidden="true"></div>
+  <h2 class="section-title reveal" id="features-title">
     <span class="num">02 / Funzionalità</span>
     Cosa Fa SportCarDB
-  </div>
+  </h2>
 
-  <div class="feat-grid reveal" style="transition-delay:.2s">
-    <div class="feat-card" style="--accent:var(--teal)">
-      <div class="feat-card" style="display:contents">
-        <style>.feat-card:nth-child(1)::before{background:var(--teal)}</style>
-      </div>
-      <div class="feat-num">01</div>
-      <div class="feat-icon-wrap bg-teal">🔍</div>
-      <div class="feat-name c-teal">Catalogo</div>
-      <div class="feat-desc">Filtri per marca, categoria, prezzo, HP, accelerazione. Ricerca istantanea.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-num">02</div>
-      <div class="feat-icon-wrap bg-gold">⚖️</div>
-      <div class="feat-name c-gold">Confronto</div>
-      <div class="feat-desc">Specs affiancate di due modelli selezionati. Visualizzazione chiara.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-num">03</div>
-      <div class="feat-icon-wrap bg-green">🤖</div>
-      <div class="feat-name c-green">Consigliatore</div>
-      <div class="feat-desc">Punteggio di compatibilità basato su budget, uso e preferenze.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-num">04</div>
-      <div class="feat-icon-wrap bg-teal">📊</div>
-      <div class="feat-name c-teal">Statistiche</div>
-      <div class="feat-desc">Ranking per cavalli, velocità massima, rapporto peso/potenza.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-num">05</div>
-      <div class="feat-icon-wrap bg-gold">👥</div>
-      <div class="feat-name c-gold">Utenti</div>
-      <div class="feat-desc">Gestione ruoli user / admin. CRUD completo con controllo accessi.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-num">06</div>
-      <div class="feat-icon-wrap bg-red">🛡️</div>
-      <div class="feat-name c-red">Sicurezza</div>
-      <div class="feat-desc">JWT, bcrypt, rate limiting, CORS. Stack hardened by default.</div>
-    </div>
+  <div class="feat-grid reveal" style="transition-delay:.2s" role="list">
+    <article class="feat-card" style="--c:var(--teal)" role="listitem">
+      <div class="feat-num" aria-hidden="true">01</div>
+      <div class="feat-icon-wrap bg-teal" aria-hidden="true">🔍</div>
+      <h3 class="feat-name c-teal">Catalogo</h3>
+      <p class="feat-desc">Filtri per marca, categoria, prezzo, HP, accelerazione. Ricerca istantanea.</p>
+    </article>
+    <article class="feat-card" style="--c:var(--gold)" role="listitem">
+      <div class="feat-num" aria-hidden="true">02</div>
+      <div class="feat-icon-wrap bg-gold" aria-hidden="true">⚖️</div>
+      <h3 class="feat-name c-gold">Confronto</h3>
+      <p class="feat-desc">Specs affiancate di due modelli selezionati. Visualizzazione chiara.</p>
+    </article>
+    <article class="feat-card" style="--c:var(--green)" role="listitem">
+      <div class="feat-num" aria-hidden="true">03</div>
+      <div class="feat-icon-wrap bg-green" aria-hidden="true">🤖</div>
+      <h3 class="feat-name c-green">Consigliatore</h3>
+      <p class="feat-desc">Punteggio di compatibilità basato su budget, uso e preferenze.</p>
+    </article>
+    <article class="feat-card" style="--c:var(--teal)" role="listitem">
+      <div class="feat-num" aria-hidden="true">04</div>
+      <div class="feat-icon-wrap bg-teal" aria-hidden="true">📊</div>
+      <h3 class="feat-name c-teal">Statistiche</h3>
+      <p class="feat-desc">Ranking per cavalli, velocità massima, rapporto peso/potenza.</p>
+    </article>
+    <article class="feat-card" style="--c:var(--gold)" role="listitem">
+      <div class="feat-num" aria-hidden="true">05</div>
+      <div class="feat-icon-wrap bg-gold" aria-hidden="true">👥</div>
+      <h3 class="feat-name c-gold">Utenti</h3>
+      <p class="feat-desc">Gestione ruoli user / admin. CRUD completo con controllo accessi.</p>
+    </article>
+    <article class="feat-card" style="--c:var(--red)" role="listitem">
+      <div class="feat-num" aria-hidden="true">06</div>
+      <div class="feat-icon-wrap bg-red" aria-hidden="true">🛡️</div>
+      <h3 class="feat-name c-red">Sicurezza</h3>
+      <p class="feat-desc">JWT, bcrypt, rate limiting, CORS. Stack hardened by default.</p>
+    </article>
   </div>
 </section>
 
 <!-- ═══════════════════ SLIDE 4 — STACK ═══════════════════ -->
-<section id="s4">
-  <div class="section-title reveal">
+<section id="s4" aria-labelledby="stack-title">
+  <h2 class="section-title reveal" id="stack-title">
     <span class="num">03 / Stack</span>
     Tecnologie Usate
-  </div>
-  <div class="stack-grid reveal" style="transition-delay:.2s">
-    <div class="stack-card after-teal">
+  </h2>
+  <div class="stack-grid reveal" style="transition-delay:.2s" role="list">
+    <article class="stack-card" style="--accent:var(--teal)" role="listitem">
       <div class="stack-header">
-        <div class="stack-icon">🖥️</div>
-        <div class="stack-name c-teal">Frontend</div>
+        <div class="stack-icon" aria-hidden="true">🖥️</div>
+        <h3 class="stack-name c-teal">Frontend</h3>
       </div>
       <ul class="stack-items">
-        <li style="--dot:var(--teal)"><span style="width:4px;height:4px;border-radius:50%;background:var(--teal);display:inline-block;flex-shrink:0"></span>HTML5 + CSS3 + Bootstrap 5</li>
-        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--teal);display:inline-block;flex-shrink:0"></span>JavaScript ES6+</li>
-        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--teal);display:inline-block;flex-shrink:0"></span>Fetch API / AJAX</li>
-        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--teal);display:inline-block;flex-shrink:0"></span>JWT in localStorage</li>
+        <li><span aria-hidden="true">•</span> HTML5 + CSS3 + Bootstrap 5</li>
+        <li><span aria-hidden="true">•</span> JavaScript ES6+</li>
+        <li><span aria-hidden="true">•</span> Fetch API / AJAX</li>
+        <li><span aria-hidden="true">•</span> JWT in localStorage</li>
       </ul>
-    </div>
-    <div class="stack-card after-gold">
+    </article>
+    <article class="stack-card" style="--accent:var(--gold)" role="listitem">
       <div class="stack-header">
-        <div class="stack-icon">⚙️</div>
-        <div class="stack-name c-gold">Backend</div>
+        <div class="stack-icon" aria-hidden="true">⚙️</div>
+        <h3 class="stack-name c-gold">Backend</h3>
       </div>
       <ul class="stack-items">
-        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--gold);display:inline-block;flex-shrink:0"></span>Python 3.9+ / Flask</li>
-        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--gold);display:inline-block;flex-shrink:0"></span>Flask-CORS + SocketIO</li>
-        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--gold);display:inline-block;flex-shrink:0"></span>PyJWT + bcrypt</li>
-        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--gold);display:inline-block;flex-shrink:0"></span>REST API JSON</li>
+        <li><span aria-hidden="true">•</span> Python 3.9+ / Flask</li>
+        <li><span aria-hidden="true">•</span> Flask-CORS + SocketIO</li>
+        <li><span aria-hidden="true">•</span> PyJWT + bcrypt</li>
+        <li><span aria-hidden="true">•</span> REST API JSON</li>
       </ul>
-    </div>
-    <div class="stack-card after-green">
+    </article>
+    <article class="stack-card" style="--accent:var(--green)" role="listitem">
       <div class="stack-header">
-        <div class="stack-icon">🗄️</div>
-        <div class="stack-name c-green">Data Layer</div>
+        <div class="stack-icon" aria-hidden="true">🗄️</div>
+        <h3 class="stack-name c-green">Data Layer</h3>
       </div>
       <ul class="stack-items">
-        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0"></span>File JSON (mock DB)</li>
-        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0"></span>cars.json + users.json</li>
-        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0"></span>CRUD su file system</li>
-        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0"></span>→ pronto per PostgreSQL</li>
+        <li><span aria-hidden="true">•</span> File JSON (mock DB)</li>
+        <li><span aria-hidden="true">•</span> cars.json + users.json</li>
+        <li><span aria-hidden="true">•</span> CRUD su file system</li>
+        <li><span aria-hidden="true">•</span> → pronto per PostgreSQL</li>
       </ul>
-    </div>
+    </article>
   </div>
 </section>
 
 <!-- ═══════════════════ SLIDE 5 — ARCHITETTURA & API ═══════════════════ -->
-<section id="s5">
-  <div class="grid-bg" style="opacity:.3"></div>
-  <div style="position:relative;z-index:1;display:flex;align-items:center;gap:4vw;width:100%;max-width:1100px">
+<section id="s5" aria-labelledby="arch-title">
+  <div class="grid-bg" style="opacity:.3" aria-hidden="true"></div>
+  <div style="position:relative;z-index:1;display:flex;align-items:center;gap:4vw;width:100%;max-width:1150px;flex-wrap:wrap">
     <div>
-      <div class="section-title reveal" style="text-align:left;margin-bottom:2.5rem">
+      <h2 class="section-title reveal" id="arch-title" style="text-align:left;margin-bottom:2.5rem">
         <span class="num" style="text-align:left">04 / Architettura</span>
         Flusso<br>Three-Tier
-      </div>
-      <div class="arch-left reveal" style="transition-delay:.2s">
-        <div class="tier-box bar-teal" style="border-color:var(--teal)">
+      </h2>
+      <div class="arch-left reveal" style="transition-delay:.2s" role="list">
+        <div class="tier-box bar-teal" style="border-color:var(--teal)" role="listitem">
           <div class="tier-name c-teal">Browser</div>
           <div class="tier-sub">HTML + JS + Bootstrap</div>
         </div>
-        <div style="display:flex;align-items:center;gap:.8rem;padding:.4rem 1.4rem">
+        <div style="display:flex;align-items:center;gap:.8rem;padding:.4rem 1.4rem" aria-hidden="true">
           <div style="width:1px;height:32px;background:var(--gray2);margin:0 8px"></div>
           <span style="font-family:var(--mono);font-size:.65rem;color:var(--gray);letter-spacing:.1em">HTTP / JSON</span>
         </div>
-        <div class="tier-box bar-gold" style="border-color:var(--gold)">
+        <div class="tier-box bar-gold" style="border-color:var(--gold)" role="listitem">
           <div class="tier-name c-gold">Flask Backend</div>
           <div class="tier-sub">Python 3.9+ · REST API</div>
         </div>
-        <div style="display:flex;align-items:center;gap:.8rem;padding:.4rem 1.4rem">
+        <div style="display:flex;align-items:center;gap:.8rem;padding:.4rem 1.4rem" aria-hidden="true">
           <div style="width:1px;height:32px;background:var(--gray2);margin:0 8px"></div>
           <span style="font-family:var(--mono);font-size:.65rem;color:var(--gray);letter-spacing:.1em">File I/O</span>
         </div>
-        <div class="tier-box bar-green" style="border-color:var(--green)">
+        <div class="tier-box bar-green" style="border-color:var(--green)" role="listitem">
           <div class="tier-name c-green">JSON Database</div>
           <div class="tier-sub">cars.json · users.json</div>
         </div>
       </div>
     </div>
 
-    <div class="arch-right reveal" style="transition-delay:.3s">
+    <div class="arch-right reveal" style="transition-delay:.3s;min-width:300px">
       <div class="api-title">Endpoint principali</div>
       <div class="api-row"><span class="method-badge m-post">POST</span><span class="api-path">/api/auth/login</span><span class="api-desc">Autenticazione JWT</span></div>
       <div class="api-row"><span class="method-badge m-get">GET</span><span class="api-path">/api/cars/search</span><span class="api-desc">Catalogo filtrato</span></div>
@@ -983,240 +1616,349 @@ body::after {
 </section>
 
 <!-- ═══════════════════ SLIDE 6 — SCHEMA DATI ═══════════════════ -->
-<section id="s6">
-  <div class="orb" style="width:400px;height:400px;background:var(--red);right:-50px;bottom:-50px;opacity:.07;filter:blur(100px)"></div>
-  <div class="section-title reveal">
+<section id="s6" aria-labelledby="schema-title">
+  <div class="orb" style="width:400px;height:400px;background:var(--red);right:-50px;bottom:-50px;opacity:.07;filter:blur(100px)" aria-hidden="true"></div>
+  <h2 class="section-title reveal" id="schema-title">
     <span class="num">05 / Schema Dati</span>
     JSON → ER Logic
-  </div>
+  </h2>
 
   <div class="schema-grid reveal" style="transition-delay:.2s">
-    <div class="table-card">
-      <div class="table-head head-red">🚗 <span>Cars</span></div>
-      <div class="table-body">
-        <div class="table-row"><span class="field-name field-pk">id</span><span class="field-type">string (PK)</span></div>
-        <div class="table-row"><span class="field-name">brand</span><span class="field-type">string</span></div>
-        <div class="table-row"><span class="field-name">model</span><span class="field-type">string</span></div>
-        <div class="table-row"><span class="field-name">category</span><span class="field-type">string</span></div>
-        <div class="table-row"><span class="field-name">price</span><span class="field-type">number (€)</span></div>
-        <div class="table-row"><span class="field-name">horsepower</span><span class="field-type">number?</span></div>
-        <div class="table-row"><span class="field-name">acceleration_0_100</span><span class="field-type">number?</span></div>
-        <div class="table-row"><span class="field-name">top_speed</span><span class="field-type">number?</span></div>
-        <div class="table-row"><span class="field-name">weight_kg</span><span class="field-type">number?</span></div>
+    <article class="table-card">
+      <div class="table-head head-red" aria-hidden="true">🚗 <span>Cars</span></div>
+      <div class="table-body" role="table" aria-label="Schema tabella Cars">
+        <div class="table-row" role="row"><span class="field-name field-pk" role="cell">id</span><span class="field-type" role="cell">string (PK)</span></div>
+        <div class="table-row" role="row"><span class="field-name" role="cell">brand</span><span class="field-type" role="cell">string</span></div>
+        <div class="table-row" role="row"><span class="field-name" role="cell">model</span><span class="field-type" role="cell">string</span></div>
+        <div class="table-row" role="row"><span class="field-name" role="cell">category</span><span class="field-type" role="cell">string</span></div>
+        <div class="table-row" role="row"><span class="field-name" role="cell">price</span><span class="field-type" role="cell">number (€)</span></div>
+        <div class="table-row" role="row"><span class="field-name" role="cell">horsepower</span><span class="field-type" role="cell">number?</span></div>
+        <div class="table-row" role="row"><span class="field-name" role="cell">acceleration_0_100</span><span class="field-type" role="cell">number?</span></div>
+        <div class="table-row" role="row"><span class="field-name" role="cell">top_speed</span><span class="field-type" role="cell">number?</span></div>
+        <div class="table-row" role="row"><span class="field-name" role="cell">weight_kg</span><span class="field-type" role="cell">number?</span></div>
       </div>
-    </div>
+    </article>
 
-    <div class="table-card">
-      <div class="table-head head-teal">👤 <span>Users</span></div>
-      <div class="table-body">
-        <div class="table-row"><span class="field-name field-pk">username</span><span class="field-type">string (PK)</span></div>
-        <div class="table-row"><span class="field-name">password_hash</span><span class="field-type">bcrypt</span></div>
-        <div class="table-row"><span class="field-name">role</span><span class="field-type">user | admin</span></div>
-        <div class="table-row"><span class="field-name">created_at</span><span class="field-type">ISO date</span></div>
-        <div class="table-row"><span class="field-name">last_login</span><span class="field-type">ISO date?</span></div>
+    <article class="table-card">
+      <div class="table-head head-teal" aria-hidden="true">👤 <span>Users</span></div>
+      <div class="table-body" role="table" aria-label="Schema tabella Users">
+        <div class="table-row" role="row"><span class="field-name field-pk" role="cell">username</span><span class="field-type" role="cell">string (PK)</span></div>
+        <div class="table-row" role="row"><span class="field-name" role="cell">password_hash</span><span class="field-type" role="cell">bcrypt</span></div>
+        <div class="table-row" role="row"><span class="field-name" role="cell">role</span><span class="field-type" role="cell">user | admin</span></div>
+        <div class="table-row" role="row"><span class="field-name" role="cell">created_at</span><span class="field-type" role="cell">ISO date</span></div>
+        <div class="table-row" role="row"><span class="field-name" role="cell">last_login</span><span class="field-type" role="cell">ISO date?</span></div>
       </div>
       <div style="padding:1rem 1.4rem;border-top:1px solid var(--gray2)">
-        <div style="font-size:.78rem;color:var(--gray);font-family:var(--mono);line-height:1.8">
+        <div style="font-size:.8rem;color:var(--gray);font-family:var(--mono);line-height:1.8">
           <span style="color:var(--red)">Admin</span> → CRUD su Cars e Users<br>
           <span style="color:var(--teal)">User</span> → sola lettura catalogo
         </div>
       </div>
-    </div>
+    </article>
   </div>
 
   <div class="schema-note reveal" style="transition-delay:.4s">↳ struttura JSON pronta per migrazione a PostgreSQL / MySQL</div>
 </section>
 
 <!-- ═══════════════════ SLIDE 7 — SICUREZZA ═══════════════════ -->
-<section id="s7">
-  <div class="section-title reveal">
+<section id="s7" aria-labelledby="security-title">
+  <h2 class="section-title reveal" id="security-title">
     <span class="num">06 / Sicurezza</span>
     Auth &amp; Protezione
-  </div>
+  </h2>
 
-  <div class="sec-grid reveal" style="transition-delay:.2s">
-    <div class="sec-card">
-      <div class="sec-card-num">01</div>
-      <div class="sec-icon">🔑</div>
-      <div class="sec-title c-teal">JWT Tokens</div>
-      <div class="sec-text">Login restituisce JWT con scadenza 24h. Ogni API richiede <code style="font-family:var(--mono);font-size:.82rem;color:var(--teal)">Bearer token</code> nell'header Authorization. Validazione server-side ad ogni chiamata.</div>
-    </div>
-    <div class="sec-card">
-      <div class="sec-card-num">02</div>
-      <div class="sec-icon">🔒</div>
-      <div class="sec-title c-red">Bcrypt Hashing</div>
-      <div class="sec-text">Le password non vengono mai salvate in chiaro. Hashing con bcrypt <code style="font-family:var(--mono);font-size:.82rem;color:var(--red)">12 round</code> prima della persistenza su file JSON.</div>
-    </div>
-    <div class="sec-card">
-      <div class="sec-card-num">03</div>
-      <div class="sec-icon">🧱</div>
-      <div class="sec-title c-gold">Ruoli & Middleware</div>
-      <div class="sec-text">Decoratori <code style="font-family:var(--mono);font-size:.82rem;color:var(--gold)">@require_login</code> e <code style="font-family:var(--mono);font-size:.82rem;color:var(--gold)">@require_admin</code> proteggono gli endpoint. Accesso granulare per ogni operazione.</div>
-    </div>
-    <div class="sec-card">
-      <div class="sec-card-num">04</div>
-      <div class="sec-icon">🚫</div>
-      <div class="sec-title c-green">Rate Limiting</div>
-      <div class="sec-text">Max <code style="font-family:var(--mono);font-size:.82rem;color:var(--green)">5 tentativi / 5 min</code> per IP sul login. Previene attacchi brute-force. CORS configurato per origine sicura.</div>
-    </div>
+  <div class="sec-grid reveal" style="transition-delay:.2s" role="list">
+    <article class="sec-card" role="listitem">
+      <div class="sec-card-num" aria-hidden="true">01</div>
+      <div class="sec-icon" aria-hidden="true">🔑</div>
+      <h3 class="sec-title c-teal">JWT Tokens</h3>
+      <p class="sec-text">Login restituisce JWT con scadenza 24h. Ogni API richiede <code>Bearer token</code> nell'header Authorization. Validazione server-side ad ogni chiamata.</p>
+    </article>
+    <article class="sec-card" role="listitem">
+      <div class="sec-card-num" aria-hidden="true">02</div>
+      <div class="sec-icon" aria-hidden="true">🔒</div>
+      <h3 class="sec-title c-red">Bcrypt Hashing</h3>
+      <p class="sec-text">Le password non vengono mai salvate in chiaro. Hashing con bcrypt <code>12 round</code> prima della persistenza su file JSON.</p>
+    </article>
+    <article class="sec-card" role="listitem">
+      <div class="sec-card-num" aria-hidden="true">03</div>
+      <div class="sec-icon" aria-hidden="true">🧱</div>
+      <h3 class="sec-title c-gold">Ruoli & Middleware</h3>
+      <p class="sec-text">Decoratori <code>@require_login</code> e <code>@require_admin</code> proteggono gli endpoint. Accesso granulare per ogni operazione.</p>
+    </article>
+    <article class="sec-card" role="listitem">
+      <div class="sec-card-num" aria-hidden="true">04</div>
+      <div class="sec-icon" aria-hidden="true">🚫</div>
+      <h3 class="sec-title c-green">Rate Limiting</h3>
+      <p class="sec-text">Max <code>5 tentativi / 5 min</code> per IP sul login. Previene attacchi brute-force. CORS configurato per origine sicura.</p>
+    </article>
   </div>
 </section>
 
 <!-- ═══════════════════ SLIDE 8 — LIVE DEMO ═══════════════════ -->
-<section id="s8">
-  <div class="grid-bg" style="opacity:.3"></div>
-  <div class="section-title reveal">
+<section id="s8" aria-labelledby="demo-title">
+  <div class="grid-bg" style="opacity:.3" aria-hidden="true"></div>
+  <h2 class="section-title reveal" id="demo-title">
     <span class="num">07 / Demo</span>
     Flusso Live
-  </div>
+  </h2>
 
-  <div class="demo-grid reveal" style="transition-delay:.2s">
-    <div class="demo-card bar-teal" style="border-color:var(--teal)">
-      <div class="demo-num c-teal">01</div>
-      <div class="demo-title">Avvio</div>
-      <div class="demo-text"><code style="font-family:var(--mono);font-size:.78rem;color:var(--teal)">python backend/app.py</code><br>Porta 5000 · localhost:5000</div>
-    </div>
-    <div class="demo-card bar-gold" style="border-color:var(--gold)">
-      <div class="demo-num c-gold">02</div>
-      <div class="demo-title">Login</div>
-      <div class="demo-text">Autenticazione admin (Loris). Token JWT salvato e inviato nelle API successive.</div>
-    </div>
-    <div class="demo-card bar-green" style="border-color:var(--green)">
-      <div class="demo-num c-green">03</div>
-      <div class="demo-title">Catalogo</div>
-      <div class="demo-text">Filtri interattivi per marca, prezzo, HP. Tabella responsive con tutti i dati.</div>
-    </div>
-    <div class="demo-card bar-teal" style="border-color:var(--teal)">
-      <div class="demo-num c-teal">04</div>
-      <div class="demo-title">Confronto</div>
-      <div class="demo-text">Selezione di 2 auto dal catalogo. Visualizzazione specs affiancata e differenze.</div>
-    </div>
-    <div class="demo-card bar-gold" style="border-color:var(--gold)">
-      <div class="demo-num c-gold">05</div>
-      <div class="demo-title">Consigliatore</div>
-      <div class="demo-text">Preferenze budget, HP, uso. Score di compatibilità calcolato per ogni auto.</div>
-    </div>
-    <div class="demo-card bar-red" style="border-color:var(--red)">
-      <div class="demo-num c-red">06</div>
-      <div class="demo-title">Gestione Admin</div>
-      <div class="demo-text">CRUD auto e utenti riservato all'admin. Cambio ruolo con un click.</div>
-    </div>
+  <div class="demo-grid reveal" style="transition-delay:.2s" role="list">
+    <article class="demo-card bar-teal" style="--border-color:var(--teal)" role="listitem">
+      <div class="demo-num c-teal" aria-hidden="true">01</div>
+      <h3 class="demo-title">Avvio</h3>
+      <p class="demo-text"><code>python backend/app.py</code><br>Porta 5000 · localhost:5000</p>
+    </article>
+    <article class="demo-card bar-gold" style="--border-color:var(--gold)" role="listitem">
+      <div class="demo-num c-gold" aria-hidden="true">02</div>
+      <h3 class="demo-title">Login</h3>
+      <p class="demo-text">Autenticazione admin (Loris). Token JWT salvato e inviato nelle API successive.</p>
+    </article>
+    <article class="demo-card bar-green" style="--border-color:var(--green)" role="listitem">
+      <div class="demo-num c-green" aria-hidden="true">03</div>
+      <h3 class="demo-title">Catalogo</h3>
+      <p class="demo-text">Filtri interattivi per marca, prezzo, HP. Tabella responsive con tutti i dati.</p>
+    </article>
+    <article class="demo-card bar-teal" style="--border-color:var(--teal)" role="listitem">
+      <div class="demo-num c-teal" aria-hidden="true">04</div>
+      <h3 class="demo-title">Confronto</h3>
+      <p class="demo-text">Selezione di 2 auto dal catalogo. Visualizzazione specs affiancata e differenze.</p>
+    </article>
+    <article class="demo-card bar-gold" style="--border-color:var(--gold)" role="listitem">
+      <div class="demo-num c-gold" aria-hidden="true">05</div>
+      <h3 class="demo-title">Consigliatore</h3>
+      <p class="demo-text">Preferenze budget, HP, uso. Score di compatibilità calcolato per ogni auto.</p>
+    </article>
+    <article class="demo-card bar-red" style="--border-color:var(--red)" role="listitem">
+      <div class="demo-num c-red" aria-hidden="true">06</div>
+      <h3 class="demo-title">Gestione Admin</h3>
+      <p class="demo-text">CRUD auto e utenti riservato all'admin. Cambio ruolo con un click.</p>
+    </article>
   </div>
 </section>
 
 <!-- ═══════════════════ SLIDE 9 — CONCLUSIONI ═══════════════════ -->
-<section id="s9">
-  <div class="orb" style="width:600px;height:600px;background:var(--red);left:-200px;top:50%;transform:translateY(-50%);opacity:.08;filter:blur(120px)"></div>
-  <div style="position:relative;z-index:1;display:flex;align-items:center;gap:5rem;width:100%;max-width:1100px">
+<section id="s9" aria-labelledby="conclusion-title">
+  <div class="orb" style="width:600px;height:600px;background:var(--red);left:-200px;top:50%;transform:translateY(-50%);opacity:.08;filter:blur(120px)" aria-hidden="true"></div>
+  <div style="position:relative;z-index:1;display:flex;align-items:center;gap:4rem;width:100%;max-width:1100px;flex-wrap:wrap">
     <div class="concl-left reveal">
-      <div class="concl-heading">
+      <h2 class="concl-heading" id="conclusion-title">
         Obiettivi<br><span>Raggiunti</span>
-      </div>
-      <ul class="check-list">
-        <li>Architettura three-tier completa</li>
-        <li>Autenticazione JWT + bcrypt sicura</li>
-        <li>CRUD auto e utenti per admin</li>
-        <li>Consigliatore automatico funzionante</li>
-        <li>Frontend responsive con Bootstrap 5</li>
+      </h2>
+      <ul class="check-list" role="list">
+        <li role="listitem">Architettura three-tier completa</li>
+        <li role="listitem">Autenticazione JWT + bcrypt sicura</li>
+        <li role="listitem">CRUD auto e utenti per admin</li>
+        <li role="listitem">Consigliatore automatico funzionante</li>
+        <li role="listitem">Frontend responsive con Bootstrap 5</li>
       </ul>
     </div>
 
-    <div style="width:1px;height:280px;background:var(--gray2);flex-shrink:0"></div>
+    <div style="width:1px;height:280px;background:var(--gray2);flex-shrink:0" aria-hidden="true"></div>
 
     <div class="concl-right reveal" style="transition-delay:.2s">
       <div class="future-title">Evoluzioni Future</div>
-      <ul class="future-list">
-        <li class="future-item"><span class="future-arrow">→</span> JSON → PostgreSQL / MySQL</li>
-        <li class="future-item"><span class="future-arrow">→</span> Unit &amp; integration tests</li>
-        <li class="future-item"><span class="future-arrow">→</span> CI/CD pipeline (GitHub Actions)</li>
-        <li class="future-item"><span class="future-arrow">→</span> Docker containerization</li>
-        <li class="future-item"><span class="future-arrow">→</span> Deploy su cloud (Heroku / AWS)</li>
+      <ul class="future-list" role="list">
+        <li class="future-item" role="listitem"><span class="future-arrow" aria-hidden="true">→</span> JSON → PostgreSQL / MySQL</li>
+        <li class="future-item" role="listitem"><span class="future-arrow" aria-hidden="true">→</span> Unit &amp; integration tests</li>
+        <li class="future-item" role="listitem"><span class="future-arrow" aria-hidden="true">→</span> CI/CD pipeline (GitHub Actions)</li>
+        <li class="future-item" role="listitem"><span class="future-arrow" aria-hidden="true">→</span> Docker containerization</li>
+        <li class="future-item" role="listitem"><span class="future-arrow" aria-hidden="true">→</span> Deploy su cloud (Heroku / AWS)</li>
       </ul>
     </div>
   </div>
 
-  <div class="footer-bar">
+  <footer class="footer-bar" role="contentinfo">
     <span>SportCarDB</span>
-    <div class="footer-dot"></div>
+    <div class="footer-dot" aria-hidden="true"></div>
     <span>Python + Flask + HTML/JS</span>
-    <div class="footer-dot"></div>
+    <div class="footer-dot" aria-hidden="true"></div>
     <span>Three-Tier Architecture</span>
-  </div>
+  </footer>
 </section>
 
 <script>
-// ── Cursor ──────────────────────────────────────────────────────
+// ════════════════════════════════════════════════
+// CUSTOM CURSOR CON PERFORMANCE OTTIMIZZATE
+// ════════════════════════════════════════════════
 const cursor = document.getElementById('cursor');
-const ring   = document.getElementById('cursorRing');
+const ring = document.getElementById('cursorRing');
 let mx = 0, my = 0, rx = 0, ry = 0;
+let isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-document.addEventListener('mousemove', e => {
-  mx = e.clientX; my = e.clientY;
-  cursor.style.left = mx - 6 + 'px';
-  cursor.style.top  = my - 6 + 'px';
-});
+if (!isTouch) {
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    // Cursor immediato per reattività
+    cursor.style.transform = `translate(${mx - 5}px, ${my - 5}px)`;
+  }, { passive: true });
 
-(function animRing() {
-  rx += (mx - rx) * .12;
-  ry += (my - ry) * .12;
-  ring.style.left = rx - 18 + 'px';
-  ring.style.top  = ry - 18 + 'px';
-  requestAnimationFrame(animRing);
-})();
+  // Animazione fluida per il ring (separata per performance)
+  function animateRing() {
+    rx += (mx - rx) * 0.15;
+    ry += (my - ry) * 0.15;
+    ring.style.transform = `translate(${rx - 20}px, ${ry - 20}px)`;
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
 
-// ── Progress bar ─────────────────────────────────────────────────
+  // Hover detection per elementi interattivi
+  const interactiveSelectors = 'a, button, .dot, .item-row, .feat-card, .stack-card, .sec-card, .demo-card, .future-item, [onclick], [role="button"]';
+  
+  document.addEventListener('mouseover', e => {
+    if (e.target.closest(interactiveSelectors)) {
+      document.body.classList.add('cursor-hover');
+    }
+  });
+  
+  document.addEventListener('mouseout', e => {
+    if (e.target.closest(interactiveSelectors)) {
+      document.body.classList.remove('cursor-hover');
+    }
+  });
+
+  // Effetto spotlight sulle feat-card
+  document.querySelectorAll('.feat-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      card.style.setProperty('--x', `${x}px`);
+      card.style.setProperty('--y', `${y}px`);
+    });
+  });
+} else {
+  // Nascondi cursor su dispositivi touch
+  cursor.style.display = 'none';
+  ring.style.display = 'none';
+}
+
+// ════════════════════════════════════════════════
+// PROGRESS BAR & SCROLL NAVIGATION
+// ════════════════════════════════════════════════
 const progressBar = document.getElementById('progress');
 const sections = document.querySelectorAll('section');
 const dots = document.querySelectorAll('.dot');
 
-function scrollTo(i) {
-  sections[i].scrollIntoView({ behavior: 'smooth' });
+function scrollTo(index) {
+  sections[index]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Aggiorna active state immediatamente per feedback
+  dots.forEach((d, i) => d.classList.toggle('active', i === index));
 }
 window.scrollTo = scrollTo;
 
-// Intersection observer for active dot & progress
-const obs = new IntersectionObserver(entries => {
+// Intersection Observer per reveal animations e progress
+const observerOptions = {
+  root: null,
+  rootMargin: '-20% 0px -20% 0px',
+  threshold: 0.4
+};
+
+const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (!entry.isIntersecting) return;
+    
     const idx = Array.from(sections).indexOf(entry.target);
-    dots.forEach((d,i) => d.classList.toggle('active', i === idx));
-    progressBar.style.width = ((idx + 1) / sections.length * 100) + '%';
-    // trigger reveals
-    entry.target.querySelectorAll('.reveal, .item-row').forEach((el, i) => {
-      setTimeout(() => el.classList.add('visible'), i * 60);
+    
+    // Update dots
+    dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+    
+    // Update progress bar
+    const progress = ((idx + 1) / sections.length) * 100;
+    progressBar.style.width = `${progress}%`;
+    
+    // Trigger reveal animations con stagger
+    const reveals = entry.target.querySelectorAll('.reveal, .item-row');
+    reveals.forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), i * 70);
     });
   });
-}, { threshold: .4 });
+}, observerOptions);
 
-sections.forEach(s => obs.observe(s));
-
-// Also scroll event for more granular progress
-window.addEventListener('scroll', () => {
-  const scrolled = window.scrollY;
-  const total = document.body.scrollHeight - window.innerHeight;
-  progressBar.style.width = (scrolled / total * 100) + '%';
-}, { passive: true });
-
-// ── Feat card colors ─────────────────────────────────────────────
-const featColors = ['var(--teal)','var(--gold)','var(--green)','var(--teal)','var(--gold)','var(--red)'];
-document.querySelectorAll('.feat-card').forEach((c,i) => {
-  c.style.setProperty('--c', featColors[i]);
-  c.style.cssText += `--c:${featColors[i]}`;
-  // inject ::before color via inline style trick
-  const style = document.createElement('style');
-  style.textContent = `.feat-card:nth-child(${i+1})::before { background: ${featColors[i]}; }`;
-  document.head.appendChild(style);
+sections.forEach(section => {
+  revealObserver.observe(section);
+  
+  // Inizializza elementi già in viewport
+  const rect = section.getBoundingClientRect();
+  if (rect.top < window.innerHeight * 0.8) {
+    section.querySelectorAll('.reveal, .item-row').forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), i * 70);
+    });
+  }
 });
 
-// Keyboard navigation
+// Scroll progress più granulare
+let ticking = false;
+window.addEventListener('scroll', () => {
+  if (!ticking) {
+    window.requestAnimationFrame(() => {
+      const scrolled = window.scrollY;
+      const total = document.body.scrollHeight - window.innerHeight;
+      const percent = Math.min(100, Math.max(0, (scrolled / total) * 100));
+      progressBar.style.width = `${percent}%`;
+      ticking = false;
+    });
+    ticking = true;
+  }
+}, { passive: true });
+
+// ════════════════════════════════════════════════
+// KEYBOARD NAVIGATION
+// ════════════════════════════════════════════════
 document.addEventListener('keydown', e => {
   const current = Array.from(sections).findIndex(s => {
     const r = s.getBoundingClientRect();
-    return r.top >= -100 && r.top < window.innerHeight/2;
+    return r.top >= -100 && r.top < window.innerHeight / 2;
   });
-  if (e.key === 'ArrowDown' || e.key === 'PageDown') scrollTo(Math.min(current+1, sections.length-1));
-  if (e.key === 'ArrowUp'   || e.key === 'PageUp')   scrollTo(Math.max(current-1, 0));
+  
+  if (['ArrowDown', 'PageDown'].includes(e.key)) {
+    e.preventDefault();
+    scrollTo(Math.min(current + 1, sections.length - 1));
+  }
+  if (['ArrowUp', 'PageUp'].includes(e.key)) {
+    e.preventDefault();
+    scrollTo(Math.max(current - 1, 0));
+  }
+  // Home/End
+  if (e.key === 'Home') { e.preventDefault(); scrollTo(0); }
+  if (e.key === 'End') { e.preventDefault(); scrollTo(sections.length - 1); }
 });
+
+// ════════════════════════════════════════════════
+// INIZIALIZZAZIONE COLORI CARD
+// ════════════════════════════════════════════════
+const featColors = ['var(--teal)','var(--gold)','var(--green)','var(--teal)','var(--gold)','var(--red)'];
+document.querySelectorAll('.feat-card').forEach((card, i) => {
+  card.style.setProperty('--c', featColors[i]);
+});
+
+// ════════════════════════════════════════════════
+// PRELOAD & PERFORMANCE
+// ════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  // Rimuovi animazioni iniziali dopo il caricamento
+  document.body.style.opacity = '1';
+  
+  // Lazy-load per immagini pesanti (se aggiunte in futuro)
+  if ('IntersectionObserver' in window) {
+    const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+    const imageObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src;
+          img.removeAttribute('loading');
+          imageObserver.unobserve(img);
+        }
+      });
+    });
+    lazyImages.forEach(img => imageObserver.observe(img));
+  }
+});
+
+// Prevent FOUC
+document.body.style.opacity = '0';
+document.body.style.transition = 'opacity 0.3s ease';
 </script>
 </body>
 </html>
