@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SportCarDB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;0,700;1,300&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #E63946;
+  --red2: #FF4D5A;
+  --bg: #07070C;
+  --bg2: #0F0F18;
+  --bg3: #161622;
+  --teal: #4ECDC4;
+  --gold: #FFD93D;
+  --green: #06D6A0;
+  --white: #F5F5F0;
+  --gray: #6B6B7A;
+  --gray2: #252530;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: 'Barlow', sans-serif;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ── Custom cursor ── */
+.cursor {
+  position: fixed; z-index: 9999;
+  width: 12px; height: 12px;
+  background: var(--red);
+  border-radius: 50%;
+  pointer-events: none;
+  transition: transform .15s ease, opacity .2s;
+  mix-blend-mode: difference;
+}
+.cursor-ring {
+  position: fixed; z-index: 9998;
+  width: 36px; height: 36px;
+  border: 1.5px solid var(--red);
+  border-radius: 50%;
+  pointer-events: none;
+  transition: transform .35s cubic-bezier(.22,.68,0,1.2), opacity .3s;
+  mix-blend-mode: difference;
+}
+
+/* ── Progress bar ── */
+#progress {
+  position: fixed; top: 0; left: 0; z-index: 1000;
+  height: 3px; width: 0%;
+  background: linear-gradient(90deg, var(--red), var(--teal));
+  transition: width .4s ease;
+}
+
+/* ── Slide nav dots ── */
+#nav-dots {
+  position: fixed; right: 2rem; top: 50%; transform: translateY(-50%);
+  z-index: 1000;
+  display: flex; flex-direction: column; gap: .7rem;
+}
+.dot {
+  width: 8px; height: 8px;
+  border: 1.5px solid var(--gray);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all .3s;
+}
+.dot.active { background: var(--red); border-color: var(--red); transform: scale(1.4); }
+.dot:hover { border-color: var(--white); }
+
+/* ── Section base ── */
+section {
+  height: 100vh; min-height: 100vh;
+  scroll-snap-align: start;
+  position: relative;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ── Animated grid bg ── */
+.grid-bg {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(230,57,70,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(230,57,70,.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridDrift 20s linear infinite;
+}
+@keyframes gridDrift {
+  from { background-position: 0 0; }
+  to   { background-position: 60px 60px; }
+}
+
+/* ── Noise overlay ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 9000;
+  pointer-events: none;
+  opacity: .025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* ── Glow orb ── */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: .18;
+  pointer-events: none;
+}
+
+/* ════════════════════════════════════════════════
+   SLIDE 1 — HERO
+════════════════════════════════════════════════ */
+#s1 {
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 8vw;
+  background: var(--bg);
+}
+.orb-red  { width: 500px; height: 500px; background: var(--red);  right: -100px; top: -100px; }
+.orb-teal { width: 300px; height: 300px; background: var(--teal); right: 200px;  bottom: 50px; opacity: .1; }
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: .5rem;
+  border: 1px solid var(--red);
+  padding: .35rem 1rem;
+  font-family: var(--mono); font-size: .75rem; letter-spacing: .15em;
+  color: var(--red); text-transform: uppercase;
+  margin-bottom: 2rem;
+  position: relative;
+  animation: fadeUp .8s .2s both;
+}
+.hero-badge::before {
+  content: ''; width: 6px; height: 6px;
+  background: var(--red); border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.6)} }
+
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(5rem, 16vw, 14rem);
+  line-height: .9;
+  letter-spacing: -.02em;
+  animation: fadeUp .8s .4s both;
+  position: relative;
+}
+.hero-title span { color: var(--red); }
+.hero-title .outline {
+  -webkit-text-stroke: 2px rgba(255,255,255,.12);
+  color: transparent;
+}
+
+.hero-sub {
+  font-size: 1.1rem; font-weight: 300; color: var(--gray);
+  margin-top: 1.5rem; max-width: 480px; line-height: 1.7;
+  animation: fadeUp .8s .6s both;
+}
+
+.hero-tags {
+  display: flex; flex-wrap: wrap; gap: .6rem;
+  margin-top: 2.5rem;
+  animation: fadeUp .8s .8s both;
+}
+.hero-tag {
+  padding: .4rem 1rem;
+  background: var(--bg3); border: 1px solid var(--gray2);
+  font-size: .8rem; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--white);
+  clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+}
+
+.hero-scroll {
+  position: absolute; bottom: 2.5rem; left: 8vw;
+  display: flex; align-items: center; gap: .8rem;
+  font-family: var(--mono); font-size: .7rem; color: var(--gray);
+  letter-spacing: .1em; text-transform: uppercase;
+  animation: fadeUp .8s 1s both;
+}
+.scroll-line {
+  width: 40px; height: 1px; background: var(--gray);
+  position: relative; overflow: hidden;
+}
+.scroll-line::after {
+  content: ''; position: absolute; top: 0; left: -100%;
+  width: 100%; height: 100%; background: var(--red);
+  animation: scanline 2s ease infinite;
+}
+@keyframes scanline { to { left: 100%; } }
+
+/* big car silhouette */
+.hero-car {
+  position: absolute; right: 6vw; bottom: 8vh;
+  width: min(55vw, 650px);
+  opacity: .07;
+  filter: blur(1px);
+  user-select: none; pointer-events: none;
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(30px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ════════════════════════════════════════════════
+   SLIDE 2 — PROBLEMA / SOLUZIONE
+════════════════════════════════════════════════ */
+#s2 { background: var(--bg2); align-items: stretch; }
+
+.two-col {
+  display: grid; grid-template-columns: 1fr 1fr;
+  width: 100%; position: relative;
+}
+.col-problem, .col-solution {
+  padding: 6rem 5vw 4rem;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.col-problem { border-right: 1px solid var(--gray2); }
+
+.col-label {
+  font-family: var(--mono); font-size: .7rem; letter-spacing: .2em;
+  text-transform: uppercase; margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: .7rem;
+}
+.col-label-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.col-heading {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  letter-spacing: .02em; line-height: 1;
+  margin-bottom: 2.5rem;
+}
+
+.item-row {
+  display: flex; align-items: flex-start; gap: 1rem;
+  padding: .9rem 0;
+  border-bottom: 1px solid var(--gray2);
+  opacity: 0; transform: translateX(-20px);
+  transition: opacity .5s, transform .5s;
+}
+.item-row.visible { opacity: 1; transform: none; }
+.col-solution .item-row { transform: translateX(20px); }
+.col-solution .item-row.visible { transform: none; }
+
+.item-icon {
+  width: 28px; height: 28px; flex-shrink: 0;
+  border-radius: 4px; display: grid; place-items: center;
+  font-size: 1rem; margin-top: .1rem;
+}
+.item-text { font-size: 1rem; font-weight: 400; line-height: 1.5; }
+.item-text strong { display: block; font-weight: 600; font-size: .95rem; margin-bottom: .1rem; }
+.item-sub { font-size: .85rem; color: var(--gray); }
+
+.vs-divider {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  z-index: 10;
+  width: 54px; height: 54px;
+  background: var(--bg);
+  border: 2px solid var(--red);
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem; letter-spacing: .1em;
+  color: var(--red);
+  box-shadow: 0 0 30px rgba(230,57,70,.4);
+}
+
+/* ════════════════════════════════════════════════
+   SLIDE 3 — FUNZIONALITÀ
+════════════════════════════════════════════════ */
+#s3 {
+  background: var(--bg);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5vw;
+  gap: 3rem;
+}
+
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  letter-spacing: .04em;
+  text-align: center;
+  position: relative;
+}
+.section-title .num {
+  font-family: var(--mono);
+  font-size: .8rem;
+  color: var(--red);
+  letter-spacing: .2em;
+  display: block;
+  text-align: center;
+  margin-bottom: .5rem;
+}
+
+.feat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5px;
+  width: 100%; max-width: 1100px;
+  background: var(--gray2);
+  border: 1.5px solid var(--gray2);
+}
+.feat-card {
+  background: var(--bg2);
+  padding: 1.8rem 1.8rem 2rem;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  transition: background .3s;
+}
+.feat-card:hover { background: var(--bg3); }
+.feat-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px;
+  opacity: 0; transition: opacity .3s;
+}
+.feat-card:hover::before { opacity: 1; }
+
+.feat-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 4rem; line-height: 1;
+  color: var(--gray2);
+  position: absolute; top: .5rem; right: 1rem;
+  transition: color .3s;
+  pointer-events: none;
+}
+.feat-card:hover .feat-num { color: var(--gray); }
+
+.feat-icon-wrap {
+  width: 42px; height: 42px;
+  border-radius: 8px;
+  display: grid; place-items: center;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+.feat-name {
+  font-weight: 700; font-size: 1.05rem;
+  margin-bottom: .4rem;
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.feat-desc { font-size: .88rem; color: var(--gray); line-height: 1.6; }
+
+/* ════════════════════════════════════════════════
+   SLIDE 4 — STACK
+════════════════════════════════════════════════ */
+#s4 {
+  background: var(--bg2);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5vw;
+  gap: 3rem;
+}
+
+.stack-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem; width: 100%; max-width: 1100px;
+}
+.stack-card {
+  background: var(--bg3);
+  border: 1px solid var(--gray2);
+  padding: 2rem 2rem 2.5rem;
+  position: relative; overflow: hidden;
+  transition: border-color .3s, transform .3s;
+}
+.stack-card:hover { border-color: var(--red); transform: translateY(-4px); }
+
+.stack-card::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 3px;
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .4s ease;
+}
+.stack-card:hover::after { transform: scaleX(1); }
+
+.stack-header {
+  display: flex; align-items: center; gap: .9rem;
+  margin-bottom: 1.8rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--gray2);
+}
+.stack-icon {
+  font-size: 1.8rem; line-height: 1;
+}
+.stack-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem; letter-spacing: .04em;
+}
+.stack-items { list-style: none; display: flex; flex-direction: column; gap: .7rem; }
+.stack-items li {
+  font-size: .92rem; color: var(--white);
+  display: flex; align-items: center; gap: .6rem;
+}
+.stack-items li::before {
+  content: '';
+  width: 4px; height: 4px; border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ════════════════════════════════════════════════
+   SLIDE 5 — ARCHITETTURA & API
+════════════════════════════════════════════════ */
+#s5 {
+  background: var(--bg);
+  align-items: center;
+  justify-content: center;
+  padding: 0 5vw;
+  gap: 4vw;
+}
+
+.arch-left {
+  flex: 0 0 280px;
+  display: flex; flex-direction: column; gap: 0;
+}
+.tier-box {
+  padding: 1.2rem 1.4rem;
+  border: 1px solid var(--gray2);
+  position: relative;
+  transition: border-color .3s;
+}
+.tier-box:hover { border-color: inherit; }
+.tier-name {
+  font-weight: 700; font-size: 1rem; letter-spacing: .04em;
+}
+.tier-sub { font-size: .78rem; color: var(--gray); margin-top: .2rem; font-family: var(--mono); }
+
+.tier-arrow {
+  height: 36px; width: 1px;
+  background: var(--gray2);
+  margin: 0 auto;
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.tier-arrow-label {
+  font-family: var(--mono); font-size: .65rem; color: var(--gray);
+  letter-spacing: .1em; text-transform: uppercase;
+  white-space: nowrap;
+  margin-left: 10px;
+  margin-top: -18px;
+}
+.tier-arrow::after {
+  content: '↓'; color: var(--gray); font-size: .9rem;
+  position: absolute; bottom: -2px;
+}
+
+.arch-right {
+  flex: 1; max-width: 650px;
+}
+.api-title {
+  font-family: var(--mono); font-size: .72rem; color: var(--gray);
+  letter-spacing: .2em; text-transform: uppercase;
+  margin-bottom: 1.2rem;
+  display: flex; align-items: center; gap: .8rem;
+}
+.api-title::after { content: ''; flex: 1; height: 1px; background: var(--gray2); }
+
+.api-row {
+  display: grid; grid-template-columns: 68px 1fr auto;
+  align-items: center; gap: 1rem;
+  padding: .75rem .8rem;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  transition: background .2s;
+  cursor: default;
+}
+.api-row:hover { background: var(--bg3); }
+
+.method-badge {
+  font-family: var(--mono); font-size: .7rem; font-weight: 700;
+  text-align: center; padding: .28rem .4rem;
+  border-radius: 3px; letter-spacing: .05em;
+}
+.m-post { background: rgba(230,57,70,.15); color: var(--red); border: 1px solid rgba(230,57,70,.3); }
+.m-get  { background: rgba(78,205,196,.12); color: var(--teal); border: 1px solid rgba(78,205,196,.3); }
+.m-all  { background: rgba(255,217,61,.12); color: var(--gold); border: 1px solid rgba(255,217,61,.3); }
+
+.api-path { font-family: var(--mono); font-size: .85rem; }
+.api-desc { font-size: .8rem; color: var(--gray); text-align: right; white-space: nowrap; }
+
+/* ════════════════════════════════════════════════
+   SLIDE 6 — SCHEMA DATI
+════════════════════════════════════════════════ */
+#s6 {
+  background: var(--bg2);
+  align-items: center;
+  justify-content: center;
+  padding: 0 5vw;
+  gap: 3rem;
+  flex-direction: column;
+}
+
+.schema-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 3rem; width: 100%; max-width: 900px;
+}
+.table-card {
+  border: 1px solid var(--gray2);
+  overflow: hidden;
+  transition: border-color .3s;
+}
+.table-card:hover { border-color: var(--red); }
+
+.table-head {
+  display: flex; align-items: center; gap: .8rem;
+  padding: 1rem 1.4rem;
+  font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: .06em;
+}
+.table-body { display: flex; flex-direction: column; }
+
+.table-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: .6rem 1.4rem;
+  border-top: 1px solid var(--gray2);
+  font-size: .88rem;
+}
+.table-row:nth-child(even) { background: rgba(255,255,255,.02); }
+.field-name { font-family: var(--mono); font-weight: 700; font-size: .82rem; }
+.field-pk { color: var(--gold); }
+.field-type { color: var(--gray); font-size: .78rem; }
+
+.schema-note {
+  font-size: .85rem; color: var(--gray);
+  text-align: center; font-family: var(--mono);
+  letter-spacing: .05em;
+}
+
+/* ════════════════════════════════════════════════
+   SLIDE 7 — SICUREZZA
+════════════════════════════════════════════════ */
+#s7 {
+  background: var(--bg);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5vw;
+  gap: 3rem;
+}
+
+.sec-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px; background: var(--gray2);
+  border: 1px solid var(--gray2);
+  width: 100%; max-width: 1000px;
+}
+.sec-card {
+  background: var(--bg2);
+  padding: 2.5rem 2.5rem 2.8rem;
+  position: relative; overflow: hidden;
+  transition: background .3s;
+}
+.sec-card:hover { background: var(--bg3); }
+
+.sec-card-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 6rem; color: var(--bg3);
+  position: absolute; right: 1.5rem; top: .5rem;
+  line-height: 1;
+  transition: color .3s;
+  pointer-events: none;
+}
+.sec-card:hover .sec-card-num { color: var(--gray2); }
+
+.sec-icon { font-size: 2rem; margin-bottom: 1rem; }
+.sec-title {
+  font-weight: 700; font-size: 1.1rem; text-transform: uppercase;
+  letter-spacing: .08em; margin-bottom: .8rem;
+}
+.sec-text { font-size: .92rem; color: var(--gray); line-height: 1.7; }
+
+/* ════════════════════════════════════════════════
+   SLIDE 8 — LIVE DEMO
+════════════════════════════════════════════════ */
+#s8 {
+  background: var(--bg2);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5vw;
+  gap: 3rem;
+}
+
+.demo-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1rem; width: 100%; max-width: 1000px;
+}
+.demo-card {
+  border: 1px solid var(--gray2);
+  padding: 1.8rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .3s, transform .2s;
+  cursor: default;
+}
+.demo-card:hover { border-color: inherit; transform: translateY(-3px); }
+
+.demo-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.8rem; line-height: 1;
+  margin-bottom: .8rem;
+}
+.demo-title { font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .6rem; }
+.demo-text { font-size: .82rem; color: var(--gray); line-height: 1.6; }
+
+/* ════════════════════════════════════════════════
+   SLIDE 9 — CONCLUSIONI
+════════════════════════════════════════════════ */
+#s9 {
+  background: var(--bg);
+  align-items: center;
+  justify-content: center;
+  padding: 0 5vw;
+  gap: 5rem;
+}
+
+.concl-left {
+  flex: 1; max-width: 450px;
+}
+.concl-heading {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3rem, 7vw, 6rem);
+  line-height: .9; margin-bottom: 2rem;
+}
+.concl-heading span { color: var(--red); }
+
+.check-list { list-style: none; display: flex; flex-direction: column; gap: .9rem; }
+.check-list li {
+  display: flex; align-items: center; gap: .9rem;
+  font-size: 1rem; font-weight: 400;
+}
+.check-list li::before {
+  content: '✓';
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; flex-shrink: 0;
+  background: rgba(6,214,160,.15);
+  color: var(--green);
+  border: 1px solid rgba(6,214,160,.3);
+  border-radius: 50%; font-size: .8rem; font-weight: 700;
+}
+
+.concl-right { flex: 1; max-width: 450px; }
+
+.future-title {
+  font-family: var(--mono); font-size: .75rem; letter-spacing: .2em;
+  color: var(--red); text-transform: uppercase;
+  margin-bottom: 1.5rem; display: flex; align-items: center; gap: .8rem;
+}
+.future-title::before { content: '→'; font-size: 1rem; }
+
+.future-list { list-style: none; display: flex; flex-direction: column; gap: 0; }
+.future-item {
+  display: flex; align-items: center; gap: 1.2rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--gray2);
+  font-size: .95rem;
+  transition: padding-left .2s;
+  cursor: default;
+}
+.future-item:hover { padding-left: .5rem; }
+.future-arrow { color: var(--red); font-family: var(--mono); font-size: .9rem; opacity: .6; }
+
+/* footer bar */
+.footer-bar {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 56px;
+  background: var(--red);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem; letter-spacing: .2em;
+  gap: 2rem;
+}
+.footer-dot { width: 4px; height: 4px; background: rgba(255,255,255,.4); border-radius: 50%; }
+
+/* ── Shared reveal animation ── */
+.reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity .7s, transform .7s;
+}
+.reveal.visible { opacity: 1; transform: none; }
+
+/* ── Color helpers ── */
+.c-red   { color: var(--red); }
+.c-teal  { color: var(--teal); }
+.c-gold  { color: var(--gold); }
+.c-green { color: var(--green); }
+.bg-red  { background: rgba(230,57,70,.18); }
+.bg-teal { background: rgba(78,205,196,.15); }
+.bg-gold { background: rgba(255,217,61,.15); }
+.bg-green{ background: rgba(6,214,160,.15); }
+.bar-red  { border-left: 3px solid var(--red); }
+.bar-teal { border-left: 3px solid var(--teal); }
+.bar-gold { border-left: 3px solid var(--gold); }
+.bar-green{ border-left: 3px solid var(--green); }
+.after-red::after   { background: var(--red); }
+.after-teal::after  { background: var(--teal); }
+.after-gold::after  { background: var(--gold); }
+.after-green::after { background: var(--green); }
+.head-red   { background: rgba(230,57,70,.2); }
+.head-teal  { background: rgba(78,205,196,.15); }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div id="progress"></div>
+
+<!-- Nav dots -->
+<div id="nav-dots">
+  <div class="dot active" onclick="scrollTo(0)" title="Intro"></div>
+  <div class="dot" onclick="scrollTo(1)" title="Problema"></div>
+  <div class="dot" onclick="scrollTo(2)" title="Funzionalità"></div>
+  <div class="dot" onclick="scrollTo(3)" title="Stack"></div>
+  <div class="dot" onclick="scrollTo(4)" title="API"></div>
+  <div class="dot" onclick="scrollTo(5)" title="Schema"></div>
+  <div class="dot" onclick="scrollTo(6)" title="Sicurezza"></div>
+  <div class="dot" onclick="scrollTo(7)" title="Demo"></div>
+  <div class="dot" onclick="scrollTo(8)" title="Conclusioni"></div>
+</div>
+
+<!-- ═══════════════════ SLIDE 1 — HERO ═══════════════════ -->
+<section id="s1">
+  <div class="grid-bg"></div>
+  <div class="orb orb-red"></div>
+  <div class="orb orb-teal"></div>
+
+  <div style="position:relative;z-index:1">
+    <div class="hero-badge">Web App · Concessionarie Auto</div>
+    <div class="hero-title">
+      Sport<span>Car</span><br>
+      <span class="outline">DB</span>
+    </div>
+    <p class="hero-sub">Sistema integrato per la gestione del catalogo veicoli, confronto modelli e consulenza automatica con architettura three-tier.</p>
+    <div class="hero-tags">
+      <div class="hero-tag">Catalogo</div>
+      <div class="hero-tag">Confronto</div>
+      <div class="hero-tag">AI Advisor</div>
+      <div class="hero-tag">JWT Auth</div>
+      <div class="hero-tag">Flask API</div>
+    </div>
+  </div>
+
+  <svg class="hero-car" viewBox="0 0 800 300" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M760 200 C760 200 740 160 700 145 L620 130 C620 130 580 80 520 65 L360 55 C320 55 260 75 220 110 L140 140 L60 150 C40 152 20 165 15 185 L10 200 L40 200 C40 200 38 220 55 232 C72 244 95 244 112 232 C129 220 127 200 127 200 L490 200 C490 200 488 220 505 232 C522 244 545 244 562 232 C579 220 577 200 577 200 L760 200 Z"/>
+    <ellipse cx="85" cy="218" rx="35" ry="35" fill="none" stroke="currentColor" stroke-width="8"/>
+    <ellipse cx="85" cy="218" rx="18" ry="18"/>
+    <ellipse cx="535" cy="218" rx="35" ry="35" fill="none" stroke="currentColor" stroke-width="8"/>
+    <ellipse cx="535" cy="218" rx="18" ry="18"/>
+    <path d="M220 110 L230 145 L380 140 L390 85 Z" opacity=".6"/>
+    <path d="M390 85 L510 70 L530 120 L380 140 Z" opacity=".5"/>
+  </svg>
+
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span>Scorri per esplorare</span>
+  </div>
+</section>
+
+<!-- ═══════════════════ SLIDE 2 — PROBLEMA ═══════════════════ -->
+<section id="s2">
+  <div class="grid-bg" style="opacity:.4"></div>
+  <div class="two-col">
+    <div class="col-problem">
+      <div class="col-label">
+        <div class="col-label-dot" style="background:var(--red)"></div>
+        <span class="c-red">Prima</span>
+      </div>
+      <div class="col-heading">Senza<br>SportCarDB</div>
+
+      <div class="item-row reveal">
+        <div class="item-icon bg-red">❌</div>
+        <div class="item-text"><strong>Catalogo disperso</strong><span class="item-sub">Difficile da filtrare, nessuna ricerca avanzata</span></div>
+      </div>
+      <div class="item-row reveal" style="transition-delay:.1s">
+        <div class="item-icon bg-red">❌</div>
+        <div class="item-text"><strong>Nessun confronto</strong><span class="item-sub">Comparazione modelli solo manuale</span></div>
+      </div>
+      <div class="item-row reveal" style="transition-delay:.2s">
+        <div class="item-icon bg-red">❌</div>
+        <div class="item-text"><strong>Suggerimenti incoerenti</strong><span class="item-sub">Raccomandazioni soggettive e imprecise</span></div>
+      </div>
+      <div class="item-row reveal" style="transition-delay:.3s">
+        <div class="item-icon bg-red">❌</div>
+        <div class="item-text"><strong>Nessuna gestione ruoli</strong><span class="item-sub">Accesso non differenziato per ruolo</span></div>
+      </div>
+      <div class="item-row reveal" style="transition-delay:.4s">
+        <div class="item-icon bg-red">❌</div>
+        <div class="item-text"><strong>Dati non centralizzati</strong><span class="item-sub">Informazioni sparse e inconsistenti</span></div>
+      </div>
+    </div>
+
+    <div class="vs-divider">VS</div>
+
+    <div class="col-solution" style="padding-left:5vw">
+      <div class="col-label">
+        <div class="col-label-dot" style="background:var(--green)"></div>
+        <span class="c-green">Dopo</span>
+      </div>
+      <div class="col-heading">Con<br>SportCarDB</div>
+
+      <div class="item-row reveal" style="transition-delay:.05s">
+        <div class="item-icon bg-green">✅</div>
+        <div class="item-text"><strong>Filtri avanzati</strong><span class="item-sub">Per marca, prezzo, HP, categoria e altro</span></div>
+      </div>
+      <div class="item-row reveal" style="transition-delay:.15s">
+        <div class="item-icon bg-green">✅</div>
+        <div class="item-text"><strong>Confronto affiancato</strong><span class="item-sub">Specs complete di due veicoli side-by-side</span></div>
+      </div>
+      <div class="item-row reveal" style="transition-delay:.25s">
+        <div class="item-icon bg-green">✅</div>
+        <div class="item-text"><strong>Consigliatore automatico</strong><span class="item-sub">Punteggio di compatibilità oggettivo</span></div>
+      </div>
+      <div class="item-row reveal" style="transition-delay:.35s">
+        <div class="item-icon bg-green">✅</div>
+        <div class="item-text"><strong>Ruoli Admin / User</strong><span class="item-sub">Autenticazione JWT con permessi granulari</span></div>
+      </div>
+      <div class="item-row reveal" style="transition-delay:.45s">
+        <div class="item-icon bg-green">✅</div>
+        <div class="item-text"><strong>Architettura scalabile</strong><span class="item-sub">Three-tier pronto per PostgreSQL</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ SLIDE 3 — FUNZIONALITÀ ═══════════════════ -->
+<section id="s3">
+  <div class="orb" style="width:400px;height:400px;background:var(--teal);left:-100px;top:50%;transform:translateY(-50%);opacity:.06;filter:blur(100px)"></div>
+  <div class="section-title reveal">
+    <span class="num">02 / Funzionalità</span>
+    Cosa Fa SportCarDB
+  </div>
+
+  <div class="feat-grid reveal" style="transition-delay:.2s">
+    <div class="feat-card" style="--accent:var(--teal)">
+      <div class="feat-card" style="display:contents">
+        <style>.feat-card:nth-child(1)::before{background:var(--teal)}</style>
+      </div>
+      <div class="feat-num">01</div>
+      <div class="feat-icon-wrap bg-teal">🔍</div>
+      <div class="feat-name c-teal">Catalogo</div>
+      <div class="feat-desc">Filtri per marca, categoria, prezzo, HP, accelerazione. Ricerca istantanea.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">02</div>
+      <div class="feat-icon-wrap bg-gold">⚖️</div>
+      <div class="feat-name c-gold">Confronto</div>
+      <div class="feat-desc">Specs affiancate di due modelli selezionati. Visualizzazione chiara.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">03</div>
+      <div class="feat-icon-wrap bg-green">🤖</div>
+      <div class="feat-name c-green">Consigliatore</div>
+      <div class="feat-desc">Punteggio di compatibilità basato su budget, uso e preferenze.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">04</div>
+      <div class="feat-icon-wrap bg-teal">📊</div>
+      <div class="feat-name c-teal">Statistiche</div>
+      <div class="feat-desc">Ranking per cavalli, velocità massima, rapporto peso/potenza.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">05</div>
+      <div class="feat-icon-wrap bg-gold">👥</div>
+      <div class="feat-name c-gold">Utenti</div>
+      <div class="feat-desc">Gestione ruoli user / admin. CRUD completo con controllo accessi.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">06</div>
+      <div class="feat-icon-wrap bg-red">🛡️</div>
+      <div class="feat-name c-red">Sicurezza</div>
+      <div class="feat-desc">JWT, bcrypt, rate limiting, CORS. Stack hardened by default.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ SLIDE 4 — STACK ═══════════════════ -->
+<section id="s4">
+  <div class="section-title reveal">
+    <span class="num">03 / Stack</span>
+    Tecnologie Usate
+  </div>
+  <div class="stack-grid reveal" style="transition-delay:.2s">
+    <div class="stack-card after-teal">
+      <div class="stack-header">
+        <div class="stack-icon">🖥️</div>
+        <div class="stack-name c-teal">Frontend</div>
+      </div>
+      <ul class="stack-items">
+        <li style="--dot:var(--teal)"><span style="width:4px;height:4px;border-radius:50%;background:var(--teal);display:inline-block;flex-shrink:0"></span>HTML5 + CSS3 + Bootstrap 5</li>
+        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--teal);display:inline-block;flex-shrink:0"></span>JavaScript ES6+</li>
+        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--teal);display:inline-block;flex-shrink:0"></span>Fetch API / AJAX</li>
+        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--teal);display:inline-block;flex-shrink:0"></span>JWT in localStorage</li>
+      </ul>
+    </div>
+    <div class="stack-card after-gold">
+      <div class="stack-header">
+        <div class="stack-icon">⚙️</div>
+        <div class="stack-name c-gold">Backend</div>
+      </div>
+      <ul class="stack-items">
+        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--gold);display:inline-block;flex-shrink:0"></span>Python 3.9+ / Flask</li>
+        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--gold);display:inline-block;flex-shrink:0"></span>Flask-CORS + SocketIO</li>
+        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--gold);display:inline-block;flex-shrink:0"></span>PyJWT + bcrypt</li>
+        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--gold);display:inline-block;flex-shrink:0"></span>REST API JSON</li>
+      </ul>
+    </div>
+    <div class="stack-card after-green">
+      <div class="stack-header">
+        <div class="stack-icon">🗄️</div>
+        <div class="stack-name c-green">Data Layer</div>
+      </div>
+      <ul class="stack-items">
+        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0"></span>File JSON (mock DB)</li>
+        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0"></span>cars.json + users.json</li>
+        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0"></span>CRUD su file system</li>
+        <li><span style="width:4px;height:4px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0"></span>→ pronto per PostgreSQL</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ SLIDE 5 — ARCHITETTURA & API ═══════════════════ -->
+<section id="s5">
+  <div class="grid-bg" style="opacity:.3"></div>
+  <div style="position:relative;z-index:1;display:flex;align-items:center;gap:4vw;width:100%;max-width:1100px">
+    <div>
+      <div class="section-title reveal" style="text-align:left;margin-bottom:2.5rem">
+        <span class="num" style="text-align:left">04 / Architettura</span>
+        Flusso<br>Three-Tier
+      </div>
+      <div class="arch-left reveal" style="transition-delay:.2s">
+        <div class="tier-box bar-teal" style="border-color:var(--teal)">
+          <div class="tier-name c-teal">Browser</div>
+          <div class="tier-sub">HTML + JS + Bootstrap</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.8rem;padding:.4rem 1.4rem">
+          <div style="width:1px;height:32px;background:var(--gray2);margin:0 8px"></div>
+          <span style="font-family:var(--mono);font-size:.65rem;color:var(--gray);letter-spacing:.1em">HTTP / JSON</span>
+        </div>
+        <div class="tier-box bar-gold" style="border-color:var(--gold)">
+          <div class="tier-name c-gold">Flask Backend</div>
+          <div class="tier-sub">Python 3.9+ · REST API</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.8rem;padding:.4rem 1.4rem">
+          <div style="width:1px;height:32px;background:var(--gray2);margin:0 8px"></div>
+          <span style="font-family:var(--mono);font-size:.65rem;color:var(--gray);letter-spacing:.1em">File I/O</span>
+        </div>
+        <div class="tier-box bar-green" style="border-color:var(--green)">
+          <div class="tier-name c-green">JSON Database</div>
+          <div class="tier-sub">cars.json · users.json</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-right reveal" style="transition-delay:.3s">
+      <div class="api-title">Endpoint principali</div>
+      <div class="api-row"><span class="method-badge m-post">POST</span><span class="api-path">/api/auth/login</span><span class="api-desc">Autenticazione JWT</span></div>
+      <div class="api-row"><span class="method-badge m-get">GET</span><span class="api-path">/api/cars/search</span><span class="api-desc">Catalogo filtrato</span></div>
+      <div class="api-row"><span class="method-badge m-get">GET</span><span class="api-path">/api/cars/compare</span><span class="api-desc">Confronto 2 auto</span></div>
+      <div class="api-row"><span class="method-badge m-post">POST</span><span class="api-path">/api/cars/recommend</span><span class="api-desc">Consigliatore</span></div>
+      <div class="api-row"><span class="method-badge m-get">GET</span><span class="api-path">/api/cars/stats</span><span class="api-desc">Ranking statistiche</span></div>
+      <div class="api-row"><span class="method-badge m-post">POST</span><span class="api-path">/api/cars</span><span class="api-desc">CRUD auto (admin)</span></div>
+      <div class="api-row"><span class="method-badge m-all">G/P/D</span><span class="api-path">/api/users</span><span class="api-desc">Gestione utenti</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ SLIDE 6 — SCHEMA DATI ═══════════════════ -->
+<section id="s6">
+  <div class="orb" style="width:400px;height:400px;background:var(--red);right:-50px;bottom:-50px;opacity:.07;filter:blur(100px)"></div>
+  <div class="section-title reveal">
+    <span class="num">05 / Schema Dati</span>
+    JSON → ER Logic
+  </div>
+
+  <div class="schema-grid reveal" style="transition-delay:.2s">
+    <div class="table-card">
+      <div class="table-head head-red">🚗 <span>Cars</span></div>
+      <div class="table-body">
+        <div class="table-row"><span class="field-name field-pk">id</span><span class="field-type">string (PK)</span></div>
+        <div class="table-row"><span class="field-name">brand</span><span class="field-type">string</span></div>
+        <div class="table-row"><span class="field-name">model</span><span class="field-type">string</span></div>
+        <div class="table-row"><span class="field-name">category</span><span class="field-type">string</span></div>
+        <div class="table-row"><span class="field-name">price</span><span class="field-type">number (€)</span></div>
+        <div class="table-row"><span class="field-name">horsepower</span><span class="field-type">number?</span></div>
+        <div class="table-row"><span class="field-name">acceleration_0_100</span><span class="field-type">number?</span></div>
+        <div class="table-row"><span class="field-name">top_speed</span><span class="field-type">number?</span></div>
+        <div class="table-row"><span class="field-name">weight_kg</span><span class="field-type">number?</span></div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-head head-teal">👤 <span>Users</span></div>
+      <div class="table-body">
+        <div class="table-row"><span class="field-name field-pk">username</span><span class="field-type">string (PK)</span></div>
+        <div class="table-row"><span class="field-name">password_hash</span><span class="field-type">bcrypt</span></div>
+        <div class="table-row"><span class="field-name">role</span><span class="field-type">user | admin</span></div>
+        <div class="table-row"><span class="field-name">created_at</span><span class="field-type">ISO date</span></div>
+        <div class="table-row"><span class="field-name">last_login</span><span class="field-type">ISO date?</span></div>
+      </div>
+      <div style="padding:1rem 1.4rem;border-top:1px solid var(--gray2)">
+        <div style="font-size:.78rem;color:var(--gray);font-family:var(--mono);line-height:1.8">
+          <span style="color:var(--red)">Admin</span> → CRUD su Cars e Users<br>
+          <span style="color:var(--teal)">User</span> → sola lettura catalogo
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="schema-note reveal" style="transition-delay:.4s">↳ struttura JSON pronta per migrazione a PostgreSQL / MySQL</div>
+</section>
+
+<!-- ═══════════════════ SLIDE 7 — SICUREZZA ═══════════════════ -->
+<section id="s7">
+  <div class="section-title reveal">
+    <span class="num">06 / Sicurezza</span>
+    Auth &amp; Protezione
+  </div>
+
+  <div class="sec-grid reveal" style="transition-delay:.2s">
+    <div class="sec-card">
+      <div class="sec-card-num">01</div>
+      <div class="sec-icon">🔑</div>
+      <div class="sec-title c-teal">JWT Tokens</div>
+      <div class="sec-text">Login restituisce JWT con scadenza 24h. Ogni API richiede <code style="font-family:var(--mono);font-size:.82rem;color:var(--teal)">Bearer token</code> nell'header Authorization. Validazione server-side ad ogni chiamata.</div>
+    </div>
+    <div class="sec-card">
+      <div class="sec-card-num">02</div>
+      <div class="sec-icon">🔒</div>
+      <div class="sec-title c-red">Bcrypt Hashing</div>
+      <div class="sec-text">Le password non vengono mai salvate in chiaro. Hashing con bcrypt <code style="font-family:var(--mono);font-size:.82rem;color:var(--red)">12 round</code> prima della persistenza su file JSON.</div>
+    </div>
+    <div class="sec-card">
+      <div class="sec-card-num">03</div>
+      <div class="sec-icon">🧱</div>
+      <div class="sec-title c-gold">Ruoli & Middleware</div>
+      <div class="sec-text">Decoratori <code style="font-family:var(--mono);font-size:.82rem;color:var(--gold)">@require_login</code> e <code style="font-family:var(--mono);font-size:.82rem;color:var(--gold)">@require_admin</code> proteggono gli endpoint. Accesso granulare per ogni operazione.</div>
+    </div>
+    <div class="sec-card">
+      <div class="sec-card-num">04</div>
+      <div class="sec-icon">🚫</div>
+      <div class="sec-title c-green">Rate Limiting</div>
+      <div class="sec-text">Max <code style="font-family:var(--mono);font-size:.82rem;color:var(--green)">5 tentativi / 5 min</code> per IP sul login. Previene attacchi brute-force. CORS configurato per origine sicura.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ SLIDE 8 — LIVE DEMO ═══════════════════ -->
+<section id="s8">
+  <div class="grid-bg" style="opacity:.3"></div>
+  <div class="section-title reveal">
+    <span class="num">07 / Demo</span>
+    Flusso Live
+  </div>
+
+  <div class="demo-grid reveal" style="transition-delay:.2s">
+    <div class="demo-card bar-teal" style="border-color:var(--teal)">
+      <div class="demo-num c-teal">01</div>
+      <div class="demo-title">Avvio</div>
+      <div class="demo-text"><code style="font-family:var(--mono);font-size:.78rem;color:var(--teal)">python backend/app.py</code><br>Porta 5000 · localhost:5000</div>
+    </div>
+    <div class="demo-card bar-gold" style="border-color:var(--gold)">
+      <div class="demo-num c-gold">02</div>
+      <div class="demo-title">Login</div>
+      <div class="demo-text">Autenticazione admin (Loris). Token JWT salvato e inviato nelle API successive.</div>
+    </div>
+    <div class="demo-card bar-green" style="border-color:var(--green)">
+      <div class="demo-num c-green">03</div>
+      <div class="demo-title">Catalogo</div>
+      <div class="demo-text">Filtri interattivi per marca, prezzo, HP. Tabella responsive con tutti i dati.</div>
+    </div>
+    <div class="demo-card bar-teal" style="border-color:var(--teal)">
+      <div class="demo-num c-teal">04</div>
+      <div class="demo-title">Confronto</div>
+      <div class="demo-text">Selezione di 2 auto dal catalogo. Visualizzazione specs affiancata e differenze.</div>
+    </div>
+    <div class="demo-card bar-gold" style="border-color:var(--gold)">
+      <div class="demo-num c-gold">05</div>
+      <div class="demo-title">Consigliatore</div>
+      <div class="demo-text">Preferenze budget, HP, uso. Score di compatibilità calcolato per ogni auto.</div>
+    </div>
+    <div class="demo-card bar-red" style="border-color:var(--red)">
+      <div class="demo-num c-red">06</div>
+      <div class="demo-title">Gestione Admin</div>
+      <div class="demo-text">CRUD auto e utenti riservato all'admin. Cambio ruolo con un click.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ SLIDE 9 — CONCLUSIONI ═══════════════════ -->
+<section id="s9">
+  <div class="orb" style="width:600px;height:600px;background:var(--red);left:-200px;top:50%;transform:translateY(-50%);opacity:.08;filter:blur(120px)"></div>
+  <div style="position:relative;z-index:1;display:flex;align-items:center;gap:5rem;width:100%;max-width:1100px">
+    <div class="concl-left reveal">
+      <div class="concl-heading">
+        Obiettivi<br><span>Raggiunti</span>
+      </div>
+      <ul class="check-list">
+        <li>Architettura three-tier completa</li>
+        <li>Autenticazione JWT + bcrypt sicura</li>
+        <li>CRUD auto e utenti per admin</li>
+        <li>Consigliatore automatico funzionante</li>
+        <li>Frontend responsive con Bootstrap 5</li>
+      </ul>
+    </div>
+
+    <div style="width:1px;height:280px;background:var(--gray2);flex-shrink:0"></div>
+
+    <div class="concl-right reveal" style="transition-delay:.2s">
+      <div class="future-title">Evoluzioni Future</div>
+      <ul class="future-list">
+        <li class="future-item"><span class="future-arrow">→</span> JSON → PostgreSQL / MySQL</li>
+        <li class="future-item"><span class="future-arrow">→</span> Unit &amp; integration tests</li>
+        <li class="future-item"><span class="future-arrow">→</span> CI/CD pipeline (GitHub Actions)</li>
+        <li class="future-item"><span class="future-arrow">→</span> Docker containerization</li>
+        <li class="future-item"><span class="future-arrow">→</span> Deploy su cloud (Heroku / AWS)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bar">
+    <span>SportCarDB</span>
+    <div class="footer-dot"></div>
+    <span>Python + Flask + HTML/JS</span>
+    <div class="footer-dot"></div>
+    <span>Three-Tier Architecture</span>
+  </div>
+</section>
+
+<script>
+// ── Cursor ──────────────────────────────────────────────────────
+const cursor = document.getElementById('cursor');
+const ring   = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx - 6 + 'px';
+  cursor.style.top  = my - 6 + 'px';
+});
+
+(function animRing() {
+  rx += (mx - rx) * .12;
+  ry += (my - ry) * .12;
+  ring.style.left = rx - 18 + 'px';
+  ring.style.top  = ry - 18 + 'px';
+  requestAnimationFrame(animRing);
+})();
+
+// ── Progress bar ─────────────────────────────────────────────────
+const progressBar = document.getElementById('progress');
+const sections = document.querySelectorAll('section');
+const dots = document.querySelectorAll('.dot');
+
+function scrollTo(i) {
+  sections[i].scrollIntoView({ behavior: 'smooth' });
+}
+window.scrollTo = scrollTo;
+
+// Intersection observer for active dot & progress
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const idx = Array.from(sections).indexOf(entry.target);
+    dots.forEach((d,i) => d.classList.toggle('active', i === idx));
+    progressBar.style.width = ((idx + 1) / sections.length * 100) + '%';
+    // trigger reveals
+    entry.target.querySelectorAll('.reveal, .item-row').forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), i * 60);
+    });
+  });
+}, { threshold: .4 });
+
+sections.forEach(s => obs.observe(s));
+
+// Also scroll event for more granular progress
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY;
+  const total = document.body.scrollHeight - window.innerHeight;
+  progressBar.style.width = (scrolled / total * 100) + '%';
+}, { passive: true });
+
+// ── Feat card colors ─────────────────────────────────────────────
+const featColors = ['var(--teal)','var(--gold)','var(--green)','var(--teal)','var(--gold)','var(--red)'];
+document.querySelectorAll('.feat-card').forEach((c,i) => {
+  c.style.setProperty('--c', featColors[i]);
+  c.style.cssText += `--c:${featColors[i]}`;
+  // inject ::before color via inline style trick
+  const style = document.createElement('style');
+  style.textContent = `.feat-card:nth-child(${i+1})::before { background: ${featColors[i]}; }`;
+  document.head.appendChild(style);
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  const current = Array.from(sections).findIndex(s => {
+    const r = s.getBoundingClientRect();
+    return r.top >= -100 && r.top < window.innerHeight/2;
+  });
+  if (e.key === 'ArrowDown' || e.key === 'PageDown') scrollTo(Math.min(current+1, sections.length-1));
+  if (e.key === 'ArrowUp'   || e.key === 'PageUp')   scrollTo(Math.max(current-1, 0));
+});
+</script>
+</body>
+</html>
